@@ -77,7 +77,7 @@ class Formula
     when @devel && @stable.nil?           then @devel   # devel-only
     when @head && @stable.nil?            then @head    # head-only
     else
-      raise "Formulae require at least a URL"
+      raise FormulaSpecificationError, "formulae require at least a URL"
     end
   end
 
@@ -99,8 +99,8 @@ class Formula
     (dir = installed_prefix).directory? && dir.children.length > 0
   end
 
-  def pinable?
-    @pin.pinable?
+  def pinnable?
+    @pin.pinnable?
   end
 
   def pinned?
@@ -164,6 +164,9 @@ class Formula
   def man8;    man+'man8'       end
   def sbin;    prefix+'sbin'    end
   def share;   prefix+'share'   end
+
+  def frameworks; prefix+'Frameworks' end
+  def kext_prefix; prefix+'Library/Extensions' end
 
   # configuration needs to be preserved past upgrades
   def etc; HOMEBREW_PREFIX+'etc' end
@@ -506,7 +509,7 @@ class Formula
       "homepage" => homepage,
       "versions" => {
         "stable" => (stable.version.to_s if stable),
-        "bottle" => bottle || false,
+        "bottle" => bottle ? true : false,
         "devel" => (devel.version.to_s if devel),
         "head" => (head.version.to_s if head)
       },
