@@ -45,7 +45,7 @@ class Formula
 
     @active_spec = determine_active_spec
     validate_attributes :url, :name, :version
-    @downloader = download_strategy.new(name, @active_spec)
+    @downloader = download_strategy.new(name, active_spec)
 
     # Combine DSL `option` and `def options`
     options.each do |opt, desc|
@@ -548,6 +548,33 @@ class Formula
 
   end
 
+  # For brew-fetch and others.
+  def fetch
+    # Ensure the cache exists
+    HOMEBREW_CACHE.mkpath
+    downloader.fetch
+    cached_download
+  end
+
+  # For FormulaInstaller.
+  def verify_download_integrity fn
+    active_spec.verify_download_integrity(fn)
+  end
+
+  def test
+    ret = nil
+    mktemp do
+      @testpath = Pathname.pwd
+      ret = instance_eval(&self.class.test)
+      @testpath = nil
+    end
+    ret
+  end
+
+  def test_defined?
+    not self.class.instance_variable_get(:@test_defined).nil?
+  end
+
   protected
 
   # Pretty titles the command and buffers stdout/stderr
@@ -613,35 +640,6 @@ class Formula
     end if removed_ENV_variables
   end
 
-  public
-
-  # For brew-fetch and others.
-  def fetch
-    # Ensure the cache exists
-    HOMEBREW_CACHE.mkpath
-    downloader.fetch
-    cached_download
-  end
-
-  # For FormulaInstaller.
-  def verify_download_integrity fn
-    active_spec.verify_download_integrity(fn)
-  end
-
-  def test
-    ret = nil
-    mktemp do
-      @testpath = Pathname.pwd
-      ret = instance_eval(&self.class.test)
-      @testpath = nil
-    end
-    ret
-  end
-
-  def test_defined?
-    not self.class.instance_variable_get(:@test_defined).nil?
-  end
-
   private
 
   def stage
@@ -679,24 +677,14 @@ class Formula
   def self.method_added method
     case method
     when :brew
-      raise "You cannot override Formula#brew"
+      raise "You cannot override Formula#brew in class #{name}"
     when :test
       @test_defined = true
     end
   end
 
+  # The methods below define the formula DSL.
   class << self
-    # The methods below define the formula DSL.
-
-    def self.attr_rw(*attrs)
-      attrs.each do |attr|
-        class_eval <<-EOS, __FILE__, __LINE__ + 1
-          def #{attr}(val=nil)
-            val.nil? ? @#{attr} : @#{attr} = val
-          end
-        EOS
-      end
-    end
 
     attr_rw :homepage, :keg_only_reason, :skip_clean_all, :cc_failures
     attr_rw :plist_startup, :plist_manual
