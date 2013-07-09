@@ -2,8 +2,8 @@ require 'formula'
 
 class Gtkmm < Formula
   homepage 'http://www.gtkmm.org/'
-  url 'http://ftp.gnome.org/pub/GNOME/sources/gtkmm/2.24/gtkmm-2.24.2.tar.xz'
-  sha256 'c90c7a29c20dd6d795925bd66ad1ff40be07cea0e4c03f4d6105a8c07448953d'
+  url 'http://ftp.gnome.org/pub/GNOME/sources/gtkmm/2.24/gtkmm-2.24.4.tar.xz'
+  sha256 '443a2ff3fcb42a915609f1779000390c640a6d7fd19ad8816e6161053696f5ee'
   depends_on 'xz' => :build
   depends_on 'pkg-config' => :build
   depends_on 'glibmm'
