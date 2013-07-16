@@ -1,6 +1,7 @@
 require 'formula'
 require 'utils'
 require 'superenv'
+require 'formula_cellar_checks'
 
 module Homebrew extend self
   def audit
@@ -75,6 +76,8 @@ class FormulaText
 end
 
 class FormulaAuditor
+  include FormulaCellarChecks
+
   attr_reader :f, :text, :problems
 
   BUILD_TIME_DEPS = %W[
@@ -145,13 +148,11 @@ class FormulaAuditor
 
       case dep.name
       when *BUILD_TIME_DEPS
-        # TODO: this should really be only dep.build? but maybe some formula
-        # depends on the current behavior to be audit-clean?
-        next if dep.tags.any?
-        next if f.name =~ /automake/ && dep.name == 'autoconf'
-        # This is actually a libltdl dep that gets converted to a non-build time
-        # libtool dep, but I don't of a good way to encode this in the dep object
-        next if f.name == 'imagemagick' && dep.name == 'libtool'
+        next if dep.build?
+        next if dep.name == 'autoconf' && f.name =~ /automake/
+        next if dep.name == 'libtool' && %w{imagemagick libgphoto2 libp11}.any? { |n| f.name == n }
+        next if dep.name =~ /autoconf|pkg-config/ && f.name == 'ruby-build'
+
         problem %{#{dep} dependency should be "depends_on '#{dep}' => :build"}
       when "git", "ruby", "emacs", "mercurial"
         problem <<-EOS.undent
@@ -204,12 +205,6 @@ class FormulaAuditor
       problem "Google Code homepage should end with a slash (url is #{f.homepage})."
     end
 
-    if f.homepage =~ %r[^http://(.*)\.github\.com/]
-      if $1 != 'github'
-        problem "GitHub pages should use the github.io domain (url is #{f.homepage})"
-      end
-    end
-
     urls = @specs.map(&:url)
 
     # Check GNU urls; doesn't apply to mirrors
@@ -222,7 +217,7 @@ class FormulaAuditor
 
     # Check SourceForge urls
     urls.each do |p|
-      # Is it a filedownload (instead of svnroot)
+      # Skip if the URL looks like a SVN repo
       next if p =~ %r[/svnroot/]
       next if p =~ %r[svn\.sourceforge]
 
@@ -502,11 +497,18 @@ class FormulaAuditor
 
   def audit_python
     if text =~ /(def\s*)?which_python/
-      problem "Replace `which_python` by `python.xy`, which returns e.g. 'python2.7'."
+      problem "Replace `which_python` by `python.xy`, which returns e.g. 'python2.7'"
     end
 
     if text =~ /which\(?["']python/
       problem "Don't locate python with `which 'python'`, use `python.binary` instead"
+    end
+
+    if text =~ /LanguageModuleDependency.new\s?\(\s?:python/
+      problem <<-EOS.undent
+        Python: Replace `LanguageModuleDependency.new(:python,'PyPi-name','module')`
+           by the new `depends_on :python => ['module' => 'PyPi-name']`
+      EOS
     end
 
     # Checks that apply only to code in def install
@@ -514,11 +516,11 @@ class FormulaAuditor
       install_body = $2
 
       if install_body =~ /system\(?\s*['"]python/
-        problem "Instead of `system 'python', ...`, call `system python, ...`."
+        problem "Instead of `system 'python', ...`, call `system python, ...`"
       end
 
       if text =~ /system\(?\s*python\.binary/
-        problem "Instead of `system python.binary, ...`, call `system python, ...`."
+        problem "Instead of `system python.binary, ...`, call `system python, ...`"
       end
     end
 
@@ -540,7 +542,7 @@ class FormulaAuditor
       # Don't check this for all formulae, because some are allowed to set the
       # PYTHONPATH. E.g. python.rb itself needs to set it.
       if text =~ /ENV\.append.*PYTHONPATH/ || text =~ /ENV\[['"]PYTHONPATH['"]\]\s*=[^=]/
-        problem "Don't set the PYTHONPATH, instead declare `depends_on :python`."
+        problem "Don't set the PYTHONPATH, instead declare `depends_on :python`"
       end
     else
       # So if there is no PythonInstalled requirement, we can check if the
@@ -564,6 +566,21 @@ class FormulaAuditor
 
   end
 
+  def audit_check_output warning_and_description
+    return unless warning_and_description
+    warning, _ = *warning_and_description
+    problem warning
+  end
+
+  def audit_installed
+    audit_check_output(check_manpages)
+    audit_check_output(check_infopages)
+    audit_check_output(check_jars)
+    audit_check_output(check_non_libraries)
+    audit_check_output(check_non_executables(f.bin))
+    audit_check_output(check_non_executables(f.sbin))
+  end
+
   def audit
     audit_file
     audit_specs
@@ -573,6 +590,7 @@ class FormulaAuditor
     audit_patches
     audit_text
     audit_python
+    audit_installed
   end
 
   private
