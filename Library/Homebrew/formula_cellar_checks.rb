@@ -4,10 +4,13 @@ module FormulaCellarChecks
     return unless bin.directory?
     return unless bin.children.length > 0
 
-    bin = (HOMEBREW_PREFIX/bin.basename).realpath
-    return if ORIGINAL_PATHS.include? bin
+    prefix_bin = (HOMEBREW_PREFIX/bin.basename)
+    return unless prefix_bin.directory?
 
-    ["#{bin} is not in your PATH",
+    prefix_bin = prefix_bin.realpath
+    return if ORIGINAL_PATHS.include? prefix_bin
+
+    ["#{prefix_bin} is not in your PATH",
       "You can amend this by altering your ~/.bashrc file"]
   end
 
@@ -18,7 +21,7 @@ module FormulaCellarChecks
     ['A top-level "man" directory was found.',
       <<-EOS.undent
         Homebrew requires that man pages live under share.
-        This can often be fixed by passing "--mandir=#{man}" to configure.
+        This can often be fixed by passing "--mandir=\#{man}" to configure.
       EOS
     ]
   end
@@ -30,7 +33,7 @@ module FormulaCellarChecks
     ['A top-level "info" directory was found.',
       <<-EOS.undent
         Homebrew suggests that info pages live under share.
-        This can often be fixed by passing "--infodir=#{info}" to configure.
+        This can often be fixed by passing "--infodir=\#{info}" to configure.
       EOS
     ]
   end
@@ -41,7 +44,7 @@ module FormulaCellarChecks
     jars = f.lib.children.select{|g| g.to_s =~ /\.jar$/}
     return if jars.empty?
 
-    ['JARs were installed to "lib".',
+    ["JARs were installed to \"#{f.lib}\".",
       <<-EOS.undent
         Installing JARs to "lib" can cause conflicts between packages.
         For Java software, it is typically better for the formula to
@@ -64,7 +67,7 @@ module FormulaCellarChecks
     end
     return if non_libraries.empty?
 
-    ['Non-libraries were installed to "lib".',
+    ["Non-libraries were installed to \"#{f.lib}\".",
       <<-EOS.undent
         Installing non-libraries to "lib" is bad practice.
         The offending files are:
@@ -82,7 +85,7 @@ module FormulaCellarChecks
     ["Non-executables were installed to \"#{bin}\".",
       <<-EOS.undent
         The offending files are:
-        #{non_exes}"
+        #{non_exes}
       EOS
     ]
   end
