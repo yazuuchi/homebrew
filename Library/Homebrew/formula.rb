@@ -357,7 +357,7 @@ class Formula
   def self.installed
     return [] unless HOMEBREW_CELLAR.directory?
 
-    HOMEBREW_CELLAR.children.map do |rack|
+    HOMEBREW_CELLAR.subdirs.map do |rack|
       begin
         factory(rack.basename.to_s)
       rescue FormulaUnavailableError
@@ -712,8 +712,9 @@ class Formula
       @conflicts ||= []
     end
 
-    def conflicts_with name, opts={}
-      conflicts << FormulaConflict.new(name, opts[:because])
+    def conflicts_with *names
+      opts = Hash === names.last ? names.pop : {}
+      names.each { |name| conflicts << FormulaConflict.new(name, opts[:because]) }
     end
 
     def skip_clean *paths
