@@ -2,8 +2,6 @@ require 'open-uri'
 require 'utils/json'
 
 class AbstractDownloadStrategy
-  attr_accessor :local_bottle_path
-
   attr_reader :name, :resource
 
   def initialize name, resource
@@ -104,8 +102,6 @@ class CurlDownloadStrategy < AbstractDownloadStrategy
   end
 
   def stage
-    ohai "Pouring #{File.basename(tarball_path)}" if tarball_path.to_s.match bottle_regex
-
     case tarball_path.compression_type
     when :zip
       with_system_path { quiet_safe_system 'unzip', {:quiet_flag => '-qq'}, tarball_path }
@@ -130,17 +126,14 @@ class CurlDownloadStrategy < AbstractDownloadStrategy
       with_system_path { safe_system 'tar', 'xf', tarball_path }
       chdir
     when :xz
-      raise "You must install XZutils: brew install xz" unless File.executable? xzpath
       with_system_path { safe_system "#{xzpath} -dc \"#{tarball_path}\" | tar xf -" }
       chdir
     when :pkg
       safe_system '/usr/sbin/pkgutil', '--expand', tarball_path, basename_without_params
       chdir
     when :rar
-      raise "You must install unrar: brew install unrar" unless which "unrar"
       quiet_safe_system 'unrar', 'x', {:quiet_flag => '-inul'}, tarball_path
     when :p7zip
-      raise "You must install 7zip: brew install p7zip" unless which "7zr"
       safe_system '7zr', 'x', tarball_path
     else
       FileUtils.cp tarball_path, basename_without_params
@@ -244,13 +237,59 @@ class CurlBottleDownloadStrategy < CurlDownloadStrategy
   def tarball_path
     @tarball_path ||= HOMEBREW_CACHE/"#{name}-#{resource.version}#{ext}"
   end
+
+  def stage
+    ohai "Pouring #{tarball_path.basename}"
+    super
+  end
 end
 
 # This strategy extracts local binary packages.
 class LocalBottleDownloadStrategy < CurlDownloadStrategy
-  def initialize formula, local_bottle_path
+  def initialize formula
     super formula.name, formula.active_spec
-    @tarball_path = local_bottle_path
+    @tarball_path = formula.local_bottle_path
+  end
+
+  def stage
+    ohai "Pouring #{tarball_path.basename}"
+    super
+  end
+end
+
+# S3DownloadStrategy downloads tarballs from AWS S3.
+# To use it, add ":using => S3DownloadStrategy" to the URL section of your
+# formula.  This download strategy uses AWS access tokens (in the
+# environment variables AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY)
+# to sign the request.  This strategy is good in a corporate setting,
+# because it lets you use a private S3 bucket as a repo for internal
+# distribution.  (It will work for public buckets as well.)
+class S3DownloadStrategy < CurlDownloadStrategy
+  def _fetch
+    # Put the aws gem requirement here (vs top of file) so it's only
+    # a dependency of S3 users, not all Homebrew users
+    require 'rubygems'
+    begin
+      require 'aws-sdk'
+    rescue LoadError
+      onoe "Install the aws-sdk gem into the gem repo used by brew."
+      raise
+    end
+
+    if @url !~ %r[^https?://+([^.]+).s3.amazonaws.com/+(.+)$] then
+      raise "Bad S3 URL: " + @url
+    end
+    (bucket,key) = $1,$2
+
+    obj = AWS::S3.new().buckets[bucket].objects[key]
+    begin
+      s3url = obj.url_for(:get)
+    rescue AWS::Errors::MissingCredentialsError
+      ohai "AWS credentials missing, trying public URL instead."
+      s3url = obj.public_url
+    end
+
+    curl s3url, '-C', downloaded_size, '-o', @temporary_path
   end
 end
 
@@ -272,9 +311,19 @@ class SubversionDownloadStrategy < AbstractDownloadStrategy
     @co
   end
 
+  def repo_valid?
+    @co.join(".svn").directory?
+  end
+
   def fetch
     @url.sub!(/^svn\+/, '') if @url =~ %r[^svn\+http://]
     ohai "Checking out #{@url}"
+
+    if @co.exist? and not repo_valid?
+      puts "Removing invalid SVN repo from cache"
+      @co.rmtree
+    end
+
     if @spec == :revision
       fetch_repo @co, @url, @ref
     elsif @spec == :revisions
@@ -311,11 +360,11 @@ class SubversionDownloadStrategy < AbstractDownloadStrategy
     # Use "svn up" when the repository already exists locally.
     # This saves on bandwidth and will have a similar effect to verifying the
     # cache as it will make any changes to get the right revision.
-    svncommand = target.exist? ? 'up' : 'checkout'
+    svncommand = target.directory? ? 'up' : 'checkout'
     args = [@@svn, svncommand]
     # SVN shipped with XCode 3.1.4 can't force a checkout.
     args << '--force' unless MacOS.version == :leopard and @@svn == '/usr/bin/svn'
-    args << url if !target.exist?
+    args << url unless target.directory?
     args << target
     args << '-r' << revision if revision
     args << '--ignore-externals' if ignore_externals
@@ -347,9 +396,9 @@ class UnsafeSubversionDownloadStrategy < SubversionDownloadStrategy
     # Use "svn up" when the repository already exists locally.
     # This saves on bandwidth and will have a similar effect to verifying the
     # cache as it will make any changes to get the right revision.
-    svncommand = target.exist? ? 'up' : 'checkout'
+    svncommand = target.directory? ? 'up' : 'checkout'
     args = [@@svn, svncommand, '--non-interactive', '--trust-server-cert', '--force']
-    args << url if !target.exist?
+    args << url unless target.directory?
     args << target
     args << '-r' << revision if revision
     args << '--ignore-externals' if ignore_externals
@@ -374,8 +423,6 @@ class GitDownloadStrategy < AbstractDownloadStrategy
   end
 
   def fetch
-    raise "You must: brew install git" unless which "git"
-
     ohai "Cloning #@url"
 
     if @clone.exist? && repo_valid?
@@ -592,20 +639,27 @@ class MercurialDownloadStrategy < AbstractDownloadStrategy
   end
 
   def fetch
-    raise "You must: brew install mercurial" unless hgpath
-
     ohai "Cloning #{@url}"
 
-    unless @clone.exist?
-      url=@url.sub(%r[^hg://], '')
-      safe_system hgpath, 'clone', url, @clone
-    else
+    if @clone.exist? && repo_valid?
       puts "Updating #{@clone}"
-      Dir.chdir(@clone) do
-        safe_system hgpath, 'pull'
-        safe_system hgpath, 'update'
-      end
+      @clone.cd { quiet_safe_system hgpath, 'pull', '--update' }
+    elsif @clone.exist?
+      puts "Removing invalid hg repo from cache"
+      @clone.rmtree
+      clone_repo
+    else
+      clone_repo
     end
+  end
+
+  def repo_valid?
+    @clone.join(".hg").directory?
+  end
+
+  def clone_repo
+    url = @url.sub(%r[^hg://], '')
+    safe_system hgpath, 'clone', url, @clone
   end
 
   def stage
@@ -641,18 +695,29 @@ class BazaarDownloadStrategy < AbstractDownloadStrategy
       ].find { |p| File.executable? p }
   end
 
-  def fetch
-    raise "You must: brew install bazaar" unless bzrpath
+  def repo_valid?
+    @clone.join(".bzr").directory?
+  end
 
+  def fetch
     ohai "Cloning #{@url}"
-    unless @clone.exist?
-      url=@url.sub(%r[^bzr://], '')
-      # 'lightweight' means history-less
-      safe_system bzrpath, 'checkout', '--lightweight', url, @clone
-    else
+
+    if @clone.exist? && repo_valid?
       puts "Updating #{@clone}"
-      Dir.chdir(@clone) { safe_system bzrpath, 'update' }
+      @clone.cd { safe_system bzrpath, 'update' }
+    elsif @clone.exist?
+      puts "Removing invalid bzr repo from cache"
+      @clone.rmtree
+      clone_repo
+    else
+      clone_repo
     end
+  end
+
+  def clone_repo
+    url = @url.sub(%r[^bzr://], '')
+    # 'lightweight' means history-less
+    safe_system bzrpath, 'checkout', '--lightweight', url, @clone
   end
 
   def stage
@@ -660,18 +725,6 @@ class BazaarDownloadStrategy < AbstractDownloadStrategy
     # See https://bugs.launchpad.net/bzr/+bug/897511
     FileUtils.cp_r Dir[@clone+"{.}"], Dir.pwd
     FileUtils.rm_r Dir[Dir.pwd+"/.bzr"]
-
-    #dst=Dir.getwd
-    #Dir.chdir @clone do
-    #  if @spec and @ref
-    #    ohai "Checking out #{@spec} #{@ref}"
-    #    Dir.chdir @clone do
-    #      safe_system bzrpath, 'export', '-r', @ref, dst
-    #    end
-    #  else
-    #    safe_system bzrpath, 'export', dst
-    #  end
-    #end
   end
 end
 
@@ -695,8 +748,6 @@ class FossilDownloadStrategy < AbstractDownloadStrategy
   end
 
   def fetch
-    raise "You must: brew install fossil" unless fossilpath
-
     ohai "Cloning #{@url}"
     unless @clone.exist?
       url=@url.sub(%r[^fossil://], '')
@@ -719,12 +770,15 @@ end
 
 class DownloadStrategyDetector
   def self.detect(url, strategy=nil)
-    if strategy.is_a? Class and strategy.ancestors.include? AbstractDownloadStrategy
-      strategy
-    elsif strategy.is_a? Symbol
+    if strategy.nil?
+      detect_from_url(url)
+    elsif Class === strategy && strategy < AbstractDownloadStrategy
+        strategy
+    elsif Symbol === strategy
       detect_from_symbol(strategy)
     else
-      detect_from_url(url)
+      raise TypeError,
+        "Unknown download strategy specification #{strategy.inspect}"
     end
   end
 
