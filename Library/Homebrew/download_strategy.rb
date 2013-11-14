@@ -228,6 +228,7 @@ class CurlApacheMirrorDownloadStrategy < CurlDownloadStrategy
     end
     wr.close
 
+    rd.readline if ARGV.verbose? # Remove Homebrew output
     buf << rd.read until rd.eof?
     rd.close
     Process.wait(pid)
@@ -502,6 +503,7 @@ class GitDownloadStrategy < VCSDownloadStrategy
     %r{git://},
     %r{https://github\.com},
     %r{http://git\.sv\.gnu\.org},
+    %r{http://llvm\.org},
   ]
 
   def host_supports_depth?
