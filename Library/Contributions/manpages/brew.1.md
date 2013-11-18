@@ -197,6 +197,9 @@ Note that these flags should only appear after a command.
     If `--git` is passed, Homebrew will create a Git repository, useful for
     creating patches to the software.
 
+  * `leaves`:
+    Show installed formulae that are not dependencies of another installed formula.
+
   * `ln`, `link [--overwrite] [--dry-run] [--force]` <formula>:
     Symlink all of <formula>'s installed files into the Homebrew prefix. This
     is done automatically when you install formula, but can be useful for DIY
@@ -518,13 +521,18 @@ can take several different forms:
     *Default:* the number of available CPU cores.
 
   * HOMEBREW\_NO\_EMOJI:
-    If set, Homebrew will not print the beer emoji on a successful build.
+    If set, Homebrew will not print the `HOMEBREW_INSTALL_BADGE` on a
+    successful build.
 
     *Note:* Homebrew will only try to print emoji on Lion or newer.
 
   * HOMEBREW\_NO\_GITHUB\_API:
     If set, Homebrew will not use the GitHub API for e.g searches or
     fetching relevant issues on a failed install.
+
+  * HOMEBREW\_INSTALL\_BADGE:
+    Text printed before the installation summary of each successful build.
+    Defaults to the beer emoji.
 
   * HOMEBREW\_SOURCEFORGE\_MIRROR:
     If set, Homebrew will use the value of `HOMEBREW_SOURCEFORGE_MIRROR` to

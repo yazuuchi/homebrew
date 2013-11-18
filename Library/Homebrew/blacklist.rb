@@ -32,7 +32,7 @@ def blacklisted? name
         sudo easy_install pip
     EOS
   when 'pil' then <<-EOS.undent
-    Instead of PIL, consider to `pip install pillow` or `brew install samueljohn/python/pillow`.
+    Instead of PIL, consider `pip install pillow` or `brew install samueljohn/python/pillow`.
     EOS
   when 'macruby' then <<-EOS.undent
     MacRuby works better when you install their package:
@@ -81,6 +81,12 @@ def blacklisted? name
       brew install leiningen
     and then follow the tutorial:
       https://github.com/technomancy/leiningen/blob/stable/doc/TUTORIAL.md
+    EOS
+  when 'rubinius' then <<-EOS.undent
+    Rubinius requires an existing Ruby 2.0 to bootstrap.
+    Doing this through Homebrew is error-prone. Instead, consider using
+    ruby-build` to build and install specific versions of Ruby:
+        brew install ruby-build
     EOS
   end
 end
