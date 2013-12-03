@@ -162,6 +162,9 @@ class CurlDownloadStrategy < AbstractDownloadStrategy
     when :xz
       with_system_path { safe_system "#{xzpath} -dc \"#{tarball_path}\" | tar xf -" }
       chdir
+    when :lzip
+      with_system_path { safe_system "#{lzippath} -dc \"#{tarball_path}\" | tar xf -" }
+      chdir
     when :pkg
       safe_system '/usr/sbin/pkgutil', '--expand', tarball_path, basename_without_params
       chdir
@@ -183,6 +186,10 @@ class CurlDownloadStrategy < AbstractDownloadStrategy
 
   def xzpath
     "#{HOMEBREW_PREFIX}/opt/xz/bin/xz"
+  end
+
+  def lzippath
+    "#{HOMEBREW_PREFIX}/opt/lzip/bin/lzip"
   end
 
   def chdir
@@ -236,13 +243,16 @@ class CurlApacheMirrorDownloadStrategy < CurlDownloadStrategy
   end
 
   def _fetch
-    mirrors = Utils::JSON.load(apache_mirrors)
-    url = mirrors.fetch('preferred') + mirrors.fetch('path_info')
+    return super if @tried_apache_mirror
+    @tried_apache_mirror = true
 
-    ohai "Best Mirror #{url}"
-    curl url, '-C', downloaded_size, '-o', temporary_path
+    mirrors = Utils::JSON.load(apache_mirrors)
+    @url = mirrors.fetch('preferred') + mirrors.fetch('path_info')
+
+    ohai "Best Mirror #{@url}"
+    super
   rescue IndexError, Utils::JSON::Error
-    raise "Couldn't determine mirror. Try again later."
+    raise CurlDownloadStrategyError, "Couldn't determine mirror, try again later."
   end
 end
 
