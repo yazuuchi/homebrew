@@ -2,9 +2,9 @@ require 'formula'
 
 class Zsh < Formula
   homepage 'http://www.zsh.org/'
-  url 'http://www.zsh.org/pub/zsh-5.0.2.tar.bz2'
-  mirror 'http://downloads.sourceforge.net/project/zsh/zsh/5.0.2/zsh-5.0.2.tar.bz2'
-  sha1 '9f55ecaaae7cdc1495f91237ba2ec087777a4ad9'
+  url 'http://fossies.org/linux/misc/zsh-5.0.4.tar.bz2'
+  mirror 'http://www.zsh.org/pub/zsh-5.0.4.tar.bz2'
+  sha1 '9c52044531a7ffa6d299bffd8610399e4a000266'
 
   depends_on 'gdbm'
   depends_on 'pcre'
@@ -27,7 +27,7 @@ class Zsh < Formula
     ]
 
     if build.include? 'enable-etcdir'
-      args << '--enable-etcdir'
+      args << '--enable-etcdir=/etc'
     else
       args << '--disable-etcdir'
     end
@@ -39,12 +39,6 @@ class Zsh < Formula
       "$(libdir)/$(tzsh)/$(VERSION)", "$(libdir)"
 
     system "make install"
-
-    # See http://zsh.sourceforge.net/Doc/Release/User-Contributions.html#Accessing-On_002dLine-Help
-    mkdir "helpfiles" do
-      system "man zshall | colcrt - | perl ../Util/helpfiles"
-      (share+"zsh/helpfiles").install Dir["*"]
-    end
   end
 
   def test
