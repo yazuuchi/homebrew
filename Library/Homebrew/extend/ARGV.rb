@@ -111,7 +111,7 @@ module HomebrewArgvExtension
   end
 
   def build_head?
-    include?('--HEAD') || include?('--head')
+    include? '--HEAD'
   end
 
   def build_devel?
@@ -155,6 +155,14 @@ module HomebrewArgvExtension
 
   def force_bottle?
     include? '--force-bottle'
+  end
+
+  def help?
+    empty? || grep(/(-h$|--help$|--usage$|-\?$|help$)/).any?
+  end
+
+  def version?
+    include? '--version'
   end
 
   # eg. `foo -ns -i --bar` has three switches, n, s and i
