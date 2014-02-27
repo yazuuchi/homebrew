@@ -61,6 +61,9 @@ module Homebrew extend self
     HOMEBREW_CACHE.children.select(&:file?).each do |file|
       next unless (version = file.version)
       next unless (name = file.basename.to_s[/(.*)-(?:#{Regexp.escape(version)})/, 1])
+#      puts file
+#      puts version.to_s
+#      puts name
 
       begin
         f = Formula.factory(name)

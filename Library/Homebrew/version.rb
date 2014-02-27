@@ -260,6 +260,10 @@ class Version
       spec.stem
     end
 
+    # e.g. bdw-gc-7.2e.tar.gz
+    m = /-(\d.\d[a-z]+)$/.match(stem)
+    return m.captures.first unless m.nil?
+
     # GitHub tarballs
     # e.g. https://github.com/foo/bar/tarball/v1.2.3
     # e.g. https://github.com/sam-github/libnet/tarball/libnet-1.1.4
