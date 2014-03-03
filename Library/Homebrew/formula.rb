@@ -359,7 +359,7 @@ class Formula
   def self.each
     names.each do |name|
       begin
-        yield Formula.factory(name)
+        yield Formulary.factory(name)
       rescue StandardError => e
         # Don't let one broken formula break commands. But do complain.
         onoe "Failed to import: #{name}"
@@ -377,7 +377,7 @@ class Formula
 
     HOMEBREW_CELLAR.subdirs.map do |rack|
       begin
-        factory(rack.basename.to_s)
+        Formulary.factory(rack.basename.to_s)
       rescue FormulaUnavailableError
       end
     end.compact
@@ -394,16 +394,19 @@ class Formula
       if name =~ %r{(.+)/(.+)/(.+)}
         tap_name = "#$1-#$2".downcase
         tapd = Pathname.new("#{HOMEBREW_LIBRARY}/Taps/#{tap_name}")
-        tapd.find_formula do |relative_pathname|
-          return "#{tapd}/#{relative_pathname}" if relative_pathname.stem.to_s == $3
-        end if tapd.directory?
+
+        if tapd.directory?
+          tapd.find_formula do |relative_pathname|
+            return "#{tapd}/#{relative_pathname}" if relative_pathname.stem.to_s == $3
+          end
+        end
       end
       # Otherwise don't resolve paths or URLs
       return name
     end
 
     # test if the name is a core formula
-    formula_with_that_name = Pathname.new("#{HOMEBREW_LIBRARY}/Formula/#{name}.rb")
+    formula_with_that_name = Formula.path(name)
     if formula_with_that_name.file? and formula_with_that_name.readable?
       return name
     end
@@ -424,6 +427,11 @@ class Formula
     return name
   end
 
+  def self.[](name)
+    Formulary.factory(name)
+  end
+
+  # deprecated
   def self.factory name
     Formulary.factory name
   end
@@ -444,7 +452,7 @@ class Formula
 
   # True if this formula is provided by Homebrew itself
   def core_formula?
-    path.realpath.to_s == Formula.path(name).to_s
+    path.realpath == Formula.path(name)
   end
 
   def self.path name

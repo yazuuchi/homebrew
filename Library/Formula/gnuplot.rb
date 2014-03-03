@@ -9,7 +9,7 @@ end
 
 class Gnuplot < Formula
   homepage 'http://www.gnuplot.info'
-  url 'http://downloads.sourceforge.net/project/gnuplot/gnuplot/4.6.3/gnuplot-4.6.3.tar.gz'
+  url 'https://downloads.sourceforge.net/project/gnuplot/gnuplot/4.6.3/gnuplot-4.6.3.tar.gz'
   sha256 'df5ffafa25fb32b3ecc0206a520f6bca8680e6dcc961efd30df34c0a1b7ea7f5'
 
   head do
@@ -65,18 +65,18 @@ class Gnuplot < Formula
     end
 
     # Help configure find libraries
-    readline = Formula.factory 'readline'
-    pdflib = Formula.factory 'pdflib-lite'
-    gd = Formula.factory 'gd'
+    readline = Formula["readline"].opt_prefix
+    pdflib = Formula["pdflib-lite"].opt_prefix
+    gd = Formula["gd"].opt_prefix
 
     args = %W[
       --disable-dependency-tracking
       --prefix=#{prefix}
-      --with-readline=#{readline.opt_prefix}
+      --with-readline=#{readline}
     ]
 
-    args << "--with-pdf=#{pdflib.opt_prefix}" if build.include? 'pdf'
-    args << '--with' + ((build.include? 'nogd') ? 'out-gd' : "-gd=#{gd.opt_prefix}")
+    args << "--with-pdf=#{pdflib}" if build.include? 'pdf'
+    args << '--with' + ((build.include? 'nogd') ? 'out-gd' : "-gd=#{gd}")
     args << '--disable-wxwidgets' unless build.include? 'wx'
     args << '--without-cairo'     unless build.include? 'cairo'
     args << '--enable-qt'             if build.include? 'qt'
