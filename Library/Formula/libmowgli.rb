@@ -1,11 +1,9 @@
 require 'formula'
 
 class Libmowgli < Formula
-  homepage 'http://www.atheme.org/project/mowgli'
-  url 'https://github.com/atheme/libmowgli-2/archive/libmowgli-2.0.0.tar.gz'
-  sha1 'dd3860fb116c4249456f13cd6c30c55e84388262'
-
-  head 'https://github.com/atheme/libmowgli-2.git'
+  homepage 'http://atheme.org/projects/libmowgli.html'
+  url 'http://distfiles.atheme.org/libmowgli-1.0.0.tar.gz'
+  sha1 '403473582e3086c1acaafed59b9915f29a5d0ce0'
 
   def install
     system "./configure", "--prefix=#{prefix}", "--with-openssl=/usr"
@@ -28,7 +26,7 @@ class Libmowgli < Formula
         return EXIT_SUCCESS;
       }
     EOS
-    system ENV.cc, "-I#{include}/libmowgli-2", "-o", "test", "test.c", "-lmowgli-2"
+    system ENV.cc, "-I#{include}/libmowgli", "-o", "test", "test.c", "-lmowgli"
     system "./test"
   end
 end
