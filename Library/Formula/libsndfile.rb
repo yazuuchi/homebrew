@@ -42,9 +42,7 @@ class Libsndfile < Formula
   #
   # yaz added the genre patch for wav
   #
-  patch do
-    DATA
-  end
+  patch :DATA
 
   def install
     ENV.universal_binary if build.universal?
