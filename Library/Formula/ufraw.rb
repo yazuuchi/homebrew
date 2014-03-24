@@ -19,6 +19,8 @@ class Ufraw < Formula
     cause "Segfault while linking"
   end
 
+  patch :DATA
+
   def install
     system "./configure", "--disable-dependency-tracking",
                           "--prefix=#{prefix}",
@@ -28,3 +30,65 @@ class Ufraw < Formula
     (share+'pixmaps').rmtree
   end
 end
+
+__END__
+diff -r 175a62914bc3 -r 67a01c583860 ufraw.h
+--- a/ufraw.h	Mon Mar 24 14:54:18 2014 +0900
++++ b/ufraw.h	Mon Mar 24 15:31:55 2014 +0900
+@@ -55,28 +55,34 @@
+  * UFObject Definitions for ufraw_settings.cc
+  */
+ 
+-extern UFName ufWB;
+-extern UFName ufPreset;
+-extern UFName ufWBFineTuning;
+-extern UFName ufTemperature;
+-extern UFName ufGreen;
+-extern UFName ufChannelMultipliers;
+-extern UFName ufLensfunAuto;
+-extern UFName ufLensfun;
+-extern UFName ufCameraModel;
+-extern UFName ufLensModel;
+-extern UFName ufFocalLength;
+-extern UFName ufAperture;
+-extern UFName ufDistance;
+-extern UFName ufTCA;
+-extern UFName ufVignetting;
+-extern UFName ufDistortion;
+-extern UFName ufModel;
+-extern UFName ufLensGeometry;
+-extern UFName ufTargetLensGeometry;
+-extern UFName ufRawImage;
+-extern UFName ufRawResources;
+-extern UFName ufCommandLine;
++#ifdef __cplusplus
++extern "C" {
++#endif
++    extern UFName ufWB;
++    extern UFName ufPreset;
++    extern UFName ufWBFineTuning;
++    extern UFName ufTemperature;
++    extern UFName ufGreen;
++    extern UFName ufChannelMultipliers;
++    extern UFName ufLensfunAuto;
++    extern UFName ufLensfun;
++    extern UFName ufCameraModel;
++    extern UFName ufLensModel;
++    extern UFName ufFocalLength;
++    extern UFName ufAperture;
++    extern UFName ufDistance;
++    extern UFName ufTCA;
++    extern UFName ufVignetting;
++    extern UFName ufDistortion;
++    extern UFName ufModel;
++    extern UFName ufLensGeometry;
++    extern UFName ufTargetLensGeometry;
++    extern UFName ufRawImage;
++    extern UFName ufRawResources;
++    extern UFName ufCommandLine;
++#ifdef __cplusplus
++}
++#endif
+ 
+ #ifdef __cplusplus
+ extern "C" {
