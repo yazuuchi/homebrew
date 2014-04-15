@@ -16,7 +16,6 @@ class UnzipGuess < Formula
   depends_on 'libguess' => :build
 
   def install
-#    system "make", "-f", "unix/Makefile", "CF_NOOPT=\"-I. -D_FILE_OFFSET_BITS=64 -DNO_LCHMOD -D_MBCS -DNO_WORKING_ISPRINT -DUNIX -Wno-format-security -Wno-self-assign\"", "macosx"
     system "make -f unix/Makefile CF_NOOPT=\"-I. -D_FILE_OFFSET_BITS=64 -DNO_LCHMOD -D_MBCS -DNO_WORKING_ISPRINT -DUNIX -Wno-format-security -Wno-self-assign\" macosx"
     system "make", "prefix=#{prefix}", "MANDIR=#{man}", "install"
   end
