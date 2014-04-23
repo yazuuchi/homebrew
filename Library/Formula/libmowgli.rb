@@ -5,8 +5,11 @@ class Libmowgli < Formula
   url 'http://distfiles.atheme.org/libmowgli-1.0.0.tar.gz'
   sha1 '403473582e3086c1acaafed59b9915f29a5d0ce0'
 
+  depends_on "openssl"
+
   def install
-    system "./configure", "--prefix=#{prefix}", "--with-openssl=/usr"
+    system "./configure", "--prefix=#{prefix}",
+                          "--with-openssl=#{Formula["openssl"].opt_prefix}"
     system "make"
     system "make", "install"
   end
