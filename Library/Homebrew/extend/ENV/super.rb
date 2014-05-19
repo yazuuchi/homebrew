@@ -81,12 +81,13 @@ module Superenv
     # x - Enable C++11 mode.
     # g - Enable "-stdlib=libc++" for clang.
     # h - Enable "-stdlib=libstdc++" for clang.
+    # K - Don't strip -arch <arch>, -m32, or -m64
     #
     # On 10.8 and newer, these flags will also be present:
     # s - apply fix for sed's Unicode support
     # a - apply fix for apr-1-config path
 
-    warn_about_non_apple_gcc($1) if self["HOMEBREW_CC"] =~ GNU_GCC_REGEXP
+    warn_about_non_apple_gcc($1) if homebrew_cc =~ GNU_GCC_REGEXP
   end
 
   private
@@ -124,7 +125,7 @@ module Superenv
 
     # Homebrew's apple-gcc42 will be outside the PATH in superenv,
     # so xcrun may not be able to find it
-    case self["HOMEBREW_CC"]
+    case homebrew_cc
     when "gcc-4.2"
       begin
        apple_gcc42 = Formulary.factory('apple-gcc42')
@@ -266,15 +267,19 @@ module Superenv
     end
   end
 
+  def permit_arch_flags
+    append "HOMEBREW_CCCFG", "K"
+  end
+
   def cxx11
-    case self["HOMEBREW_CC"]
+    case homebrew_cc
     when "clang"
       append 'HOMEBREW_CCCFG', "x", ''
       append 'HOMEBREW_CCCFG', "g", ''
     when /gcc-4\.(8|9)/
       append 'HOMEBREW_CCCFG', "x", ''
     else
-      raise "The selected compiler doesn't support C++11: #{self['HOMEBREW_CC']}"
+      raise "The selected compiler doesn't support C++11: #{homebrew_cc}"
     end
   end
 
