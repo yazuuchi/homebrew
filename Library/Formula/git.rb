@@ -4,6 +4,18 @@ class Git < Formula
   homepage "http://git-scm.com"
   head "https://github.com/git/git.git", :shallow => false
 
+  head do
+    resource "man" do
+      url "https://www.kernel.org/pub/software/scm/git/testing/git-manpages-2.0.0.rc3.tar.gz"
+      sha1 "c1ed66e64c907a389e743f16200ccc0d53051ca8"
+    end
+
+    resource "html" do
+      url "https://www.kernel.org/pub/software/scm/git/testing/git-htmldocs-2.0.0.rc3.tar.gz"
+      sha1 "5e5a8374b36d2b794ecd5bfb648e0f16c0236ca5"
+    end
+  end
+
   stable do
     url "https://www.kernel.org/pub/software/scm/git/git-1.9.3.tar.gz"
     sha1 "8306305c4d39ac4fc07c9cf343241f12f7b69df2"
