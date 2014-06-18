@@ -17,14 +17,19 @@ class HpnSsh < Formula
   conflicts_with 'openssh'
 
   patch do
-    url "http://www.honeyplanet.jp/openssh_66_hpn.diff"
-    sha1 "4a915f0464b2d44f3e581c95eb0260b54f8c235e"
+    url "https://downloads.sourceforge.net/hpnssh/openssh-6.6p1-hpnssh14v5.diff.gz"
+    sha1 "6ac45f7f4d61a8500fea100346febe00443c5b8b"
+  end
+
+  patch do
+    url "http://www.honeyplanet.jp/openssh_66p1_post_hpn14v5_backout_CTR_threading.diff"
+    sha1 "4e8199d604c7dfc7816cb10895f08f1da1736086"
   end
 
   if build.with? 'keychain-support'
     patch do
-      url "http://www.honeyplanet.jp/openssh_66_post_hpn_keychain.diff"
-      sha1 "45e2321c5c672f321c8953fa3bb3324a94312046"
+      url "http://www.honeyplanet.jp/openssh_66p1_post_hpn14v5_keychain.diff"
+      sha1 "3719379080d40c8a5008f2396f67171a5f6372a1"
     end
   end
 
