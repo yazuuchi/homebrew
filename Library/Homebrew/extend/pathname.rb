@@ -348,6 +348,7 @@ class Pathname
       opoo "tried to write exec scripts to #{self} for an empty list of targets"
       return
     end
+    mkpath
     targets.each do |target|
       target = Pathname.new(target) # allow pathnames or strings
       (self+target.basename()).write <<-EOS.undent
@@ -361,6 +362,7 @@ class Pathname
   def write_env_script target, env
     env_export = ''
     env.each {|key, value| env_export += "#{key}=\"#{value}\" "}
+    dirname.mkpath
     self.write <<-EOS.undent
     #!/bin/bash
     #{env_export}exec "#{target}" "$@"
@@ -379,6 +381,7 @@ class Pathname
 
   # Writes an exec script that invokes a java jar
   def write_jar_script target_jar, script_name, java_opts=""
+    mkpath
     (self+script_name).write <<-EOS.undent
       #!/bin/bash
       exec java #{java_opts} -jar #{target_jar} "$@"
