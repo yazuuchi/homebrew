@@ -2,8 +2,7 @@ require 'formula'
 require 'keg'
 require 'bottles'
 
-module Homebrew extend self
-
+module Homebrew
   def cleanup
     # individual cleanup_ methods should also check for the existence of the
     # appropriate directories before assuming they exist
@@ -40,7 +39,7 @@ module Homebrew extend self
   def cleanup_cellar
     HOMEBREW_CELLAR.subdirs.each do |rack|
       begin
-        cleanup_formula Formula.factory(rack.basename.to_s)
+        cleanup_formula Formulary.factory(rack.basename.to_s)
       rescue FormulaUnavailableError
         # Don't complain about directories from DIY installs
       end
@@ -84,7 +83,7 @@ module Homebrew extend self
 #      puts name
 
       begin
-        f = Formula.factory(name)
+        f = Formulary.factory(name)
       rescue FormulaUnavailableError
         next
       end
