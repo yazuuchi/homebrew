@@ -3,14 +3,6 @@ require 'os/mac'
 require 'extend/ARGV'
 require 'bottle_version'
 
-def bottle_filename options={}
-  name     = options.fetch(:name)
-  version  = options.fetch(:version)
-  tag      = options.fetch(:tag)
-  revision = options.fetch(:revision)
-  "#{name}-#{version}.#{tag}#{bottle_suffix(revision)}"
-end
-
 def built_as_bottle? f
   return false unless f.installed?
   tab = Tab.for_keg(f.installed_prefix)
@@ -27,17 +19,8 @@ def bottle_file_outdated? f, file
   bottle_ext && bottle_url_ext && bottle_ext != bottle_url_ext
 end
 
-def bottle_suffix revision
-  revision = revision > 0 ? ".#{revision}" : ""
-  ".bottle#{revision}.tar.gz"
-end
-
 def bottle_native_regex
   /(\.#{bottle_tag}\.bottle\.(\d+\.)?tar\.gz)$/o
-end
-
-def bottle_url(root_url, filename_options)
-  "#{root_url}/#{bottle_filename(filename_options)}"
 end
 
 def bottle_tag
@@ -69,8 +52,8 @@ class BottleCollector
   end
 
   def fetch_checksum_for(tag)
-    return self[tag], tag if key?(tag)
-    find_altivec_tag(tag) || find_or_later_tag(tag)
+    tag = find_matching_tag(tag)
+    return self[tag], tag if tag
   end
 
   def keys
@@ -91,6 +74,14 @@ class BottleCollector
 
   private
 
+  def find_matching_tag(tag)
+    if key?(tag)
+      tag
+    else
+      find_altivec_tag(tag) || find_or_later_tag(tag)
+    end
+  end
+
   # This allows generic Altivec PPC bottles to be supported in some
   # formulae, while also allowing specific bottles in others; e.g.,
   # sometimes a formula has just :tiger_altivec, other times it has
@@ -98,7 +89,7 @@ class BottleCollector
   def find_altivec_tag(tag)
     if tag.to_s =~ /(\w+)_(g4|g4e|g5)$/
       altivec_tag = "#{$1}_altivec".to_sym
-      return self[altivec_tag], altivec_tag if key?(altivec_tag)
+      altivec_tag if key?(altivec_tag)
     end
   end
 
@@ -106,13 +97,17 @@ class BottleCollector
   # so the same bottle can target multiple OSs.
   # Not used in core, used in taps.
   def find_or_later_tag(tag)
-    results = @checksums.find_all {|k,v| k.to_s =~ /_or_later$/}
-    results.each do |key, hsh|
-      later_tag = key.to_s[/(\w+)_or_later$/, 1].to_sym
-      bottle_version = MacOS::Version.from_symbol(later_tag)
-      return [hsh, key] if bottle_version <= MacOS::Version.from_symbol(tag)
+    begin
+      tag_version = MacOS::Version.from_symbol(tag)
+    rescue ArgumentError
+      return
     end
 
-    nil
+    keys.find do |key|
+      if key.to_s.end_with?("_or_later")
+        later_tag = key.to_s[/(\w+)_or_later$/, 1].to_sym
+        MacOS::Version.from_symbol(later_tag) <= tag_version
+      end
+    end
   end
 end

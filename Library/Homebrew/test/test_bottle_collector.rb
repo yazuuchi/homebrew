@@ -16,7 +16,17 @@ class BottleCollectorTests < Homebrew::TestCase
     assert_equal ['bar', :mountain_lion], checksum_for(:mountain_lion)
   end
 
-  def test_collector_returns_nil_on_no_matches
+  def test_collector_returns_when_empty
+    assert_nil checksum_for(:foo)
+  end
+
+  def test_collector_returns_nil_for_no_match
+    @collector[:lion] = "foo"
+    assert_nil checksum_for(:foo)
+  end
+
+  def test_collector_returns_nil_for_no_match_when_later_tag_present
+    @collector[:lion_or_later] = "foo"
     assert_nil checksum_for(:foo)
   end
 
