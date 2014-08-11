@@ -1,13 +1,8 @@
 require 'options'
 
-# This class holds the build-time options defined for a Formula,
-# and provides named access to those options during install.
 class BuildOptions
-  include Enumerable
-
   attr_accessor :args
   attr_accessor :universal
-  attr_reader :options
 
   def initialize(args, options)
     @args = Options.coerce(args)
@@ -16,30 +11,7 @@ class BuildOptions
 
   def initialize_copy(other)
     super
-    @options = other.options.dup
     @args = other.args.dup
-  end
-
-  def add name, description=nil
-    description ||= case name.to_s
-      when "universal" then "Build a universal binary"
-      when "32-bit" then "Build 32-bit only"
-      when "c++11" then "Build using C++11 mode"
-      end.to_s
-
-    @options << Option.new(name, description)
-  end
-
-  def empty?
-    @options.empty?
-  end
-
-  def each(*args, &block)
-    @options.each(*args, &block)
-  end
-
-  def as_flags
-    @options.as_flags
   end
 
   def include? name
