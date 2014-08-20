@@ -216,8 +216,7 @@ class FormulaInstaller
 
     check_requirements(req_map)
 
-    deps = [].concat(req_deps).concat(f.deps)
-    deps = expand_dependencies(deps)
+    deps = expand_dependencies(req_deps + f.deps)
 
     if deps.empty? and only_deps?
       puts "All dependencies for #{f} are satisfied."
@@ -311,7 +310,7 @@ class FormulaInstaller
   def inherited_options_for(dep)
     inherited_options = Options.new
     u = Option.new("universal")
-    if (options.include?(u) || f.build.universal?) && !dep.build? && dep.to_formula.option_defined?(u)
+    if (options.include?(u) || f.require_universal_deps?) && !dep.build? && dep.to_formula.option_defined?(u)
       inherited_options << u
     end
     inherited_options
@@ -465,9 +464,7 @@ class FormulaInstaller
   end
 
   def build_argv
-    opts = Options.coerce(sanitized_ARGV_options)
-    opts.concat(options)
-    opts
+    Options.create(sanitized_ARGV_options) + options
   end
 
   def build
