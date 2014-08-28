@@ -18,7 +18,6 @@ class GtkmmQuartz < Formula
   depends_on 'pangomm-quartz'
   depends_on 'atkmm'
   depends_on 'cairomm-quartz'
-  depends_on :x11
 
   def install
     system "./configure", "--disable-dependency-tracking", "--prefix=#{prefix}"

@@ -14,7 +14,6 @@ class LibgladeQuartz < Formula
   depends_on 'pkg-config' => :build
   depends_on 'libxml2'
   depends_on 'gtk+-quartz'
-  depends_on :x11
 
   def install
     ENV.append 'LDFLAGS', '-lgmodule-2.0'

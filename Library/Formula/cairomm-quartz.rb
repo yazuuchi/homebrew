@@ -12,7 +12,6 @@ class CairommQuartz < Formula
     sha1 "8640ddb943e78dc271c870d259c079bbbfcba668" => :lion
   end
 
-  option 'without-x', 'Build without X11 support'
   option :cxx11
 
   depends_on 'pkg-config' => :build
@@ -24,7 +23,6 @@ class CairommQuartz < Formula
 
   depends_on 'cairo-quartz'
   depends_on 'libpng'
-  depends_on :x11 if build.with? "x"
 
   def install
     ENV.cxx11 if build.cxx11?

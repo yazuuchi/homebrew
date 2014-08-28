@@ -12,7 +12,6 @@ class LibrsvgQuartz < Formula
     sha1 "276af00164ceb754199b2aed99079378b581579e" => :lion
   end
 
-  depends_on :x11
   depends_on 'pkg-config' => :build
   depends_on 'gtk+-quartz'
   depends_on 'libcroco'

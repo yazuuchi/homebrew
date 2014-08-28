@@ -5,7 +5,6 @@ class EasyTagQuartz < Formula
   url "http://ftp.gnome.org/pub/GNOME/sources/easytag/2.2/easytag-2.2.3.tar.xz"
   sha1 "dfe4170f01b0d1e571329999995b5859fb2a2ce3"
 
-  depends_on :x11
   depends_on "pkg-config" => :build
   depends_on "intltool" => :build
   depends_on "itstool" => :build

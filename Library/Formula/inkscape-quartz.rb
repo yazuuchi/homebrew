@@ -31,7 +31,6 @@ class InkscapeQuartz < Formula
   depends_on 'little-cms'
   depends_on 'cairomm-quartz'
   depends_on 'pango-quartz'
-  depends_on :x11
   depends_on 'poppler-quartz' => :optional
   depends_on 'hicolor-icon-theme'
 

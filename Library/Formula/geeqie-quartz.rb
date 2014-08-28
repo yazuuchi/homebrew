@@ -5,7 +5,6 @@ class GeeqieQuartz < Formula
   url 'https://downloads.sourceforge.net/project/geeqie/geeqie/geeqie-1.1/geeqie-1.1.tar.gz'
   sha1 '77167479e91e03d9512535a146c5d2d77941257f'
 
-  depends_on :x11
   depends_on 'pkg-config' => :build
   depends_on 'intltool' => :build
   depends_on 'gettext'
