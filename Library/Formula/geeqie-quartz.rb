@@ -10,7 +10,7 @@ class GeeqieQuartz < Formula
   depends_on 'gettext'
   depends_on 'gtk+-quartz'
   depends_on 'gnu-getopt'
-#  depends_on 'imagemagick' => :recommended
+  depends_on 'imagemagick-quartz' => :recommended
   depends_on 'exiv2' => :recommended
   depends_on 'little-cms' => :recommended
   depends_on 'fbida' => :recommended
