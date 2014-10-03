@@ -4,13 +4,13 @@ class Jrnl < Formula
   homepage "http://maebert.github.io/jrnl/"
   url "https://github.com/maebert/jrnl/archive/1.9.6.tar.gz"
   sha1 "925571cd9ba85803a291d0a0816dbf79882e45dd"
-  revision 1
+  revision 2
 
   bottle do
     cellar :any
-    sha1 "68111b2f2070623dfa91869989843018faa5244c" => :mavericks
-    sha1 "98e6b91c9f935129ba55f6a912eb7bf1fec9fcb6" => :mountain_lion
-    sha1 "33ed611db67d3be6f827a4a707db7697a0597cd4" => :lion
+    sha1 "4065ac663f692810f854256bbee38e9611bb193f" => :mavericks
+    sha1 "da02ddf49d31cbfe264b51162328db5c6c38f68e" => :mountain_lion
+    sha1 "b518ad8634355a28662b7ddd0bad390615cf091d" => :lion
   end
 
   depends_on :python if MacOS.version <= :snow_leopard
@@ -31,8 +31,8 @@ class Jrnl < Formula
   end
 
   resource "python-dateutil" do
-    url "https://pypi.python.org/packages/source/p/python-dateutil/python-dateutil-2.2.tar.gz"
-    sha1 "fbafcd19ea0082b3ecb17695b4cb46070181699f"
+    url "https://pypi.python.org/packages/source/p/python-dateutil/python-dateutil-1.5.tar.gz"
+    sha1 "28dec6c6361dd12805dc8e8887cd7da7e3348f39"
   end
 
   resource "pytz" do
@@ -53,7 +53,7 @@ class Jrnl < Formula
 
   def install
     ENV.prepend_create_path "PYTHONPATH", "#{libexec}/lib/python2.7/site-packages"
-    %w[pycrypto keyring parsedatetime python-dateutil pytz six tzlocal].each do |r|
+    %w[six pycrypto keyring parsedatetime python-dateutil pytz tzlocal].each do |r|
         resource(r).stage do
             system "python", "setup.py", "install", "--prefix=#{libexec}"
         end
