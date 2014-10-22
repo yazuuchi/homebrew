@@ -11,7 +11,7 @@
 # --email:        Generate an email subject file.
 # --no-bottle:    Run brew install without --build-bottle
 # --HEAD:         Run brew install with --HEAD
-# --local:        Ask Homebrew to write verbose logs under ./logs/
+# --local:        Ask Homebrew to write verbose logs under ./logs/ and set HOME to ./home/
 # --tap=<tap>:    Use the git repository of the given tap
 # --dry-run:      Just print commands, don't run them.
 #
@@ -175,7 +175,7 @@ module Homebrew
       elsif formula
         @formulae = [argument]
       else
-        odie "#{argument} is not a pull request URL, commit URL or formula name."
+        raise ArgumentError.new("#{argument} is not a pull request URL, commit URL or formula name.")
       end
 
       @category = __method__
@@ -535,6 +535,8 @@ module Homebrew
     end
 
     if ARGV.include? '--local'
+      ENV['HOME'] = "#{Dir.pwd}/home"
+      mkdir_p ENV['HOME']
       ENV['HOMEBREW_LOGS'] = "#{Dir.pwd}/logs"
     end
 
@@ -595,8 +597,15 @@ module Homebrew
       tests << test
     else
       ARGV.named.each do |argument|
-        test = Test.new(argument, tap)
-        any_errors ||= !test.run
+        test_error = false
+        begin
+          test = Test.new(argument, tap)
+          test_error = !test.run
+        rescue ArgumentError => e
+          test_error = true
+          ofail e.message
+        end
+        any_errors ||= test_error
         tests << test
       end
     end

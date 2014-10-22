@@ -1,7 +1,7 @@
 require 'formula'
 
 class Libmowgli < Formula
-  homepage 'http://atheme.org/Projects/libmowgli.html'
+  homepage 'http://atheme.org/Project/mowgli'
   url 'https://github.com/yazuuchi/libmowgli/archive/libmowgli-1.0.0.tar.gz'
   sha1 'c939f1e87844c1b43a6a1f254a458c0b4dc32d98'
 

@@ -6,13 +6,6 @@ class Libsndfile < Formula
   mirror "https://mirrors.kernel.org/debian/pool/main/libs/libsndfile/libsndfile_1.0.25.orig.tar.gz"
   sha1 "e95d9fca57f7ddace9f197071cbcfb92fa16748e"
 
-#  bottle do
-#    cellar :any
-#    sha1 "bd27edb2cd2a4f9c61a544826560efb1344c00c9" => :mavericks
-#    sha1 "aebbedbecf6f288a7ef627232cca93391967009d" => :mountain_lion
-#    sha1 "f3c80b95ef44874272104d8eadc41aa417523766" => :lion
-#  end
-
   depends_on "pkg-config" => :build
   depends_on "autoconf" => :build
   depends_on "automake" => :build
