@@ -2,16 +2,15 @@ require "formula"
 
 class Ffmpeg < Formula
   homepage "https://ffmpeg.org/"
-  url "https://ffmpeg.org/releases/ffmpeg-2.4.2.tar.bz2"
-  sha1 "8fedc6f235d8510f716bca1784faa8cbe5d9cf78"
+  url "https://www.ffmpeg.org/releases/ffmpeg-2.4.3.tar.bz2"
+  sha1 "a2f05df7ea3e65ede2898e055b0c6615accfb1b3"
 
   head "git://git.videolan.org/ffmpeg.git"
 
   bottle do
-    revision 1
-    sha1 "3ec4fe17082336a1d8bde43aa52af094760dedbb" => :yosemite
-    sha1 "e6de1a13aa53860fbf3e2b812d5c17df35306b5b" => :mavericks
-    sha1 "0bdfcdecc609fb9a1ae4fab42123f6cf0e477c1b" => :mountain_lion
+    sha1 "da5376cb5a7942f694ddc71db7e0f62e121ac7a2" => :yosemite
+    sha1 "7d47d99d0b127914141fa071450fa0808649edae" => :mavericks
+    sha1 "aebc5376516664a78896928b8249dae8443fdd92" => :mountain_lion
   end
 
   option "without-x264", "Disable H.264 encoder"
@@ -73,7 +72,6 @@ class Ffmpeg < Formula
             "--enable-nonfree",
             "--enable-hardcoded-tables",
             "--enable-avresample",
-            "--enable-vda",
             "--cc=#{ENV.cc}",
             "--host-cflags=#{ENV.cflags}",
             "--host-ldflags=#{ENV.ldflags}"
@@ -109,6 +107,16 @@ class Ffmpeg < Formula
       args << "--enable-libopenjpeg"
       args << "--disable-decoder=jpeg2000"
       args << "--extra-cflags=" + %x[pkg-config --cflags libopenjpeg].chomp
+    end
+
+    # A bug in a dispatch header on 10.10, included via CoreFoundation,
+    # prevents GCC from building VDA support. GCC has no probles on
+    # 10.9 and earlier.
+    # See: https://github.com/Homebrew/homebrew/issues/33741
+    if MacOS.version < :yosemite || ENV.compiler == :clang
+      args << "--enable-vda"
+    else
+      args << "--disable-vda"
     end
 
     # For 32-bit compilation under gcc 4.2, see:
