@@ -2,9 +2,9 @@ require 'formula'
 
 class HpnSsh < Formula
   homepage 'http://www.openssh.com/'
-  url 'http://ftp5.eu.openbsd.org/ftp/pub/OpenBSD/OpenSSH/portable/openssh-6.6p1.tar.gz'
-  version '6.6p1'
-  sha1 'b850fd1af704942d9b3c2eff7ef6b3a59b6a6b6e'
+  url 'http://ftp5.eu.openbsd.org/ftp/pub/OpenBSD/OpenSSH/portable/openssh-6.7p1.tar.gz'
+  version '6.7p1'
+  sha1 '14e5fbed710ade334d65925e080d1aaeb9c85bf6'
 
   option 'with-brewed-openssl', 'Build with Homebrew OpenSSL instead of the system version'
   option 'without-keychain-support', 'Build without keychain and launch daemon support'
@@ -17,19 +17,19 @@ class HpnSsh < Formula
   conflicts_with 'openssh'
 
   patch do
-    url "https://downloads.sourceforge.net/hpnssh/openssh-6.6p1-hpnssh14v5.diff.gz"
-    sha1 "6ac45f7f4d61a8500fea100346febe00443c5b8b"
+    url "http://www.honeyplanet.jp/openssh_67p1_hpn14v5.diff"
+    sha1 "fb8b57c5b20a5a67a617396d132fb3d7fbe1d216"
   end
 
   patch do
-    url "http://www.honeyplanet.jp/openssh_66p1_post_hpn14v5_backout_CTR_threading.diff"
-    sha1 "4e8199d604c7dfc7816cb10895f08f1da1736086"
+    url "http://www.honeyplanet.jp/openssh_67p1_post_hpn14v5_backout_CTR_threading.diff"
+    sha1 "2c5b8d2b47155bfc4ab1b5609bb0542d145af340"
   end
 
   if build.with? 'keychain-support'
     patch do
-      url "http://www.honeyplanet.jp/openssh_66p1_post_hpn14v5_keychain.diff"
-      sha1 "3719379080d40c8a5008f2396f67171a5f6372a1"
+      url "http://www.honeyplanet.jp/openssh_67p1_post_hpn14v5_keychain.diff"
+      sha1 "0253eb966709559c0daead3457da6344a92c3300"
     end
   end
 
