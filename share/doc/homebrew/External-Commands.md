@@ -96,15 +96,13 @@ These commands have been contributed by Homebrew users but are not included in t
 
 >You can install manually or using `brew tap`:
 > ```
-> $ brew install telemachus/desc/brew-desc
+> $ brew tap telemachus/desc
 > ```
 
-### brew-gem and brew-pip
->Install any gem pip package into a self-contained Homebrew cellar location
+### brew-gem
+>Install any gem package into a self-contained Homebrew cellar location: <https://github.com/sportngin/brew-gem>
 >
->[https://github.com/josh/brew-gem](https://github.com/josh/brew-gem), [https://github.com/josh/brew-pip](https://github.com/josh/brew-pip)
->
->*Note:* These can also be installed with `brew install brew-gem` and `brew install brew-pip`
+>*Note:* This can also be installed with `brew install brew-gem`.
 
 ### brew-growl
 >Get Growl notifications for Homebrew https://github.com/secondplanet/brew-growl
