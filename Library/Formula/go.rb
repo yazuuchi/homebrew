@@ -2,7 +2,7 @@ require 'formula'
 
 class Go < Formula
   homepage 'http://golang.org'
-  head 'https://go.googlesource.com/go'
+  head 'https://go.googlesource.com/go', :using => :git
   url 'https://storage.googleapis.com/golang/go1.4.src.tar.gz'
   version '1.4'
   sha1 '6a7d9bd90550ae1e164d7803b3e945dc8309252b'
@@ -72,8 +72,8 @@ class Go < Formula
       http://golang.org/doc/go1.2#go_tools_godoc
 
     To get `go vet` and `go doc` run:
-      go get code.google.com/p/go.tools/cmd/godoc
-      go get code.google.com/p/go.tools/cmd/vet
+      go get golang.org/x/tools/cmd/vet
+      go get golang.org/x/tools/cmd/godoc
 
     You may wish to add the GOROOT-based install location to your PATH:
       export PATH=$PATH:#{opt_libexec}/bin

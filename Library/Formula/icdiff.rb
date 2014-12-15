@@ -3,8 +3,8 @@ require "tempfile"
 
 class Icdiff < Formula
   homepage "https://github.com/jeffkaufman/icdiff"
-  url "https://github.com/jeffkaufman/icdiff/archive/release-1.5.1.tar.gz"
-  sha1 "f65b5fe7915fa716024eff70ed36917a2a5558e0"
+  url "https://github.com/jeffkaufman/icdiff/archive/release-1.6.0.tar.gz"
+  sha1 "542795c92023ed75ed5e043386e82a9dfc8f8691"
 
   def install
     bin.install "icdiff", "git-icdiff"
