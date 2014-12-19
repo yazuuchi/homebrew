@@ -115,7 +115,7 @@ module Homebrew
   end
 
   def rm_DS_Store
-    system "find #{HOMEBREW_PREFIX} -name .DS_Store -delete 2>/dev/null"
+    quiet_system "find", HOMEBREW_PREFIX.to_s, "-name", ".DS_Store", "-delete"
   end
 
 end
