@@ -13,6 +13,25 @@ class AbstractDownloadStrategy
     @meta = resource.specs
   end
 
+  # Download and cache the resource as {#cached_location}.
+  def fetch
+  end
+
+  # Unpack {#cached_location} into the current working directory.
+  def stage
+  end
+
+  # @!attribute [r] cached_location
+  # The path to the cached file or directory associated with the resource.
+  def cached_location
+  end
+
+  # Remove {#cached_location} and any other files associated with the resource
+  # from the cache.
+  def clear_cache
+    rm_rf(cached_location)
+  end
+
   def expand_safe_system_args args
     args = args.dup
     args.each_with_index do |arg, ii|
@@ -33,12 +52,6 @@ class AbstractDownloadStrategy
   def quiet_safe_system *args
     safe_system(*expand_safe_system_args(args))
   end
-
-  # All download strategies are expected to implement these methods
-  def fetch; end
-  def stage; end
-  def cached_location; end
-  def clear_cache; end
 
   private
 
@@ -114,10 +127,6 @@ class VCSDownloadStrategy < AbstractDownloadStrategy
 
   def cached_location
     @clone
-  end
-
-  def clear_cache
-    cached_location.rmtree if cached_location.exist?
   end
 
   def head?
@@ -229,7 +238,8 @@ class CurlDownloadStrategy < AbstractDownloadStrategy
   end
 
   def clear_cache
-    [cached_location, temporary_path].each { |f| f.unlink if f.exist? }
+    super
+    rm_rf(temporary_path)
   end
 
   private
@@ -345,9 +355,7 @@ class NoUnzipCurlDownloadStrategy < CurlDownloadStrategy
   end
 end
 
-# This strategy is provided for use with sites that only provide HTTPS and
-# also have a broken cert. Try not to need this, as we probably won't accept
-# the formula.
+# @deprecated
 class CurlUnsafeDownloadStrategy < CurlDownloadStrategy
   def _fetch
     curl @url, '--insecure', '-C', downloaded_size, '-o', temporary_path
@@ -492,9 +500,10 @@ class SubversionDownloadStrategy < VCSDownloadStrategy
   alias_method :update, :clone_repo
 end
 
+# @deprecated
 StrictSubversionDownloadStrategy = SubversionDownloadStrategy
 
-# Download from SVN servers with invalid or self-signed certs
+# @deprecated
 class UnsafeSubversionDownloadStrategy < SubversionDownloadStrategy
   def fetch_args
     %w[--non-interactive --trust-server-cert]
@@ -642,6 +651,14 @@ class CVSDownloadStrategy < VCSDownloadStrategy
   def initialize(name, resource)
     super
     @url = @url.sub(%r[^cvs://], "")
+
+    if meta.key?(:module)
+      @module = meta.fetch(:module)
+    elsif @url !~ %r[:[^/]+$]
+      @module = name
+    else
+      @module, @url = split_url(@url)
+    end
   end
 
   def stage
@@ -659,15 +676,9 @@ class CVSDownloadStrategy < VCSDownloadStrategy
   end
 
   def clone_repo
-    # URL of cvs cvs://:pserver:anoncvs@www.gccxml.org:/cvsroot/GCC_XML:gccxml
-    # will become:
-    # cvs -d :pserver:anoncvs@www.gccxml.org:/cvsroot/GCC_XML login
-    # cvs -d :pserver:anoncvs@www.gccxml.org:/cvsroot/GCC_XML co gccxml
-    mod, url = split_url(@url)
-
     HOMEBREW_CACHE.cd do
-      quiet_safe_system cvspath, { :quiet_flag => "-Q" }, "-d", url, "login"
-      quiet_safe_system cvspath, { :quiet_flag => "-Q" }, "-d", url, "checkout", "-d", cache_filename, mod
+      quiet_safe_system cvspath, { :quiet_flag => "-Q" }, "-d", @url, "login"
+      quiet_safe_system cvspath, { :quiet_flag => "-Q" }, "-d", @url, "checkout", "-d", cache_filename, @module
     end
   end
 
