@@ -35,7 +35,7 @@ module Homebrew
         ARGV.casks.each do |c|
           cmd = "brew", "cask", "install", c
           ohai cmd.join " "
-          system *cmd
+          system(*cmd)
         end
       end
 
@@ -51,6 +51,11 @@ module Homebrew
         # Building stable-only with --HEAD is an error
         if ARGV.build_head? and f.head.nil?
           raise "No head is defined for #{f.name}"
+        end
+
+        # Building stable-only with --devel is an error
+        if ARGV.build_devel? and f.devel.nil?
+          raise "No devel block is defined for #{f.name}"
         end
 
         if f.installed?

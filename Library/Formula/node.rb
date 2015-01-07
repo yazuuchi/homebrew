@@ -1,15 +1,14 @@
-require "formula"
-
 # Note that x.even are stable releases, x.odd are devel releases
 class Node < Formula
   homepage "https://nodejs.org/"
-  url "https://nodejs.org/dist/v0.10.34/node-v0.10.34.tar.gz"
-  sha256 "d7f8473b5849873039f7e62595e12dcdb78c8dffda317e1253b3123876bf3415"
+  url "https://nodejs.org/dist/v0.10.35/node-v0.10.35.tar.gz"
+  sha256 "0043656bb1724cb09dbdc960a2fd6ee37d3badb2f9c75562b2d11235daa40a03"
+  revision 1
 
   bottle do
-    sha1 "4eb82594b4f9368d7081b599b686e7a61f7c77f7" => :yosemite
-    sha1 "ad33eb03850df294962152157d4958d5778fe380" => :mavericks
-    sha1 "c52c72c86cca56f736f7f723bf0291da5ebda9b2" => :mountain_lion
+    sha1 "652168b4eed7141cdd648e9463dc246a6b7f2e60" => :yosemite
+    sha1 "9b117ec5da09b2d62f19b7ce7686f0e9dbd5e74a" => :mavericks
+    sha1 "524ff7c572ec83611347951f370c97de8e240ea5" => :mountain_lion
   end
 
   head do
@@ -37,8 +36,8 @@ class Node < Formula
   end
 
   resource "npm" do
-    url "https://registry.npmjs.org/npm/-/npm-2.1.14.tgz"
-    sha1 "02f7a15112adc859191c9be9b9a601e866931aea"
+    url "https://registry.npmjs.org/npm/-/npm-2.1.17.tgz"
+    sha1 "80fa7873188659037ec0ed8ebc95c2b2723c8ac4"
   end
 
   def install
