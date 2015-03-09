@@ -52,8 +52,6 @@ module Homebrew
     result = false
 
     keg.each_unique_file_matching(string) do |file|
-      put_filename = false
-
       # Check dynamic library linkage. Importantly, do not run otool on static
       # libraries, which will falsely report "linkage" to themselves.
       if file.mach_o_executable? or file.dylib? or file.mach_o_bundle?
@@ -202,7 +200,7 @@ module Homebrew
     bottle.prefix prefix
     bottle.cellar relocatable ? :any : cellar
     bottle.revision bottle_revision
-    bottle.sha1 bottle_path.sha1 => bottle_tag
+    bottle.sha256 bottle_path.sha256 => bottle_tag
 
     output = bottle_output bottle
 
