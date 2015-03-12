@@ -2,21 +2,11 @@ require "formula"
 
 class ImagemagickQuartz < Formula
   homepage "http://www.imagemagick.org"
-
-  # upstream's stable tarballs tend to disappear, so we provide our own mirror
-  # Tarball and checksum from: http://www.imagemagick.org/download
-  url "https://downloads.sf.net/project/machomebrew/mirror/ImageMagick-6.8.9-7.tar.xz"
-  mirror "http://www.imagemagick.org/download/ImageMagick-6.8.9-7.tar.xz"
-  sha256 "45670f37ebd3354d64e45df5462b929b5b843dee2b038b0ad524491492bffbf9"
+  url "http://www.imagemagick.org/download/releases/ImageMagick-6.9.0-10.tar.xz"
+  sha256 "d1f5dcd32a93130feb9e980a8a97517d3a2c814a8b608d139d4756516548748c"
 
   head "https://www.imagemagick.org/subversion/ImageMagick/trunk",
     :using => UnsafeSubversionDownloadStrategy
-
-  bottle do
-    sha1 "a899454c8b4940ca04f991c5ed0b268baea8e960" => :mavericks
-    sha1 "0616e461385b1d0be1428181b6e676f5bcc0e5ae" => :mountain_lion
-    sha1 "a6783e3deea4502b2878ea85cd1a3fde58b22573" => :lion
-  end
 
   option "with-quantum-depth-8", "Compile with a quantum depth of 8 bit"
   option "with-quantum-depth-16", "Compile with a quantum depth of 16 bit"
@@ -25,6 +15,7 @@ class ImagemagickQuartz < Formula
   option "without-magick-plus-plus", "disable build/install of Magick++"
   option "with-jp2", "Compile with Jpeg2000 support"
   option "enable-hdri", "Compile with HDRI support"
+  option "with-fftw", "Compile with FFTW support"
 
   depends_on "libtool" => :run
 
@@ -34,7 +25,6 @@ class ImagemagickQuartz < Formula
   depends_on "libpng" => :recommended
   depends_on "freetype" => :recommended
 
-  depends_on :x11 => :optional
   depends_on "fontconfig" => :optional
   depends_on "libtiff" => :optional
   depends_on "little-cms" => :optional
@@ -46,14 +36,9 @@ class ImagemagickQuartz < Formula
   depends_on "ghostscript" => :optional
   depends_on "webp" => :optional
   depends_on "homebrew/versions/openjpeg21" if build.with? "jp2"
+  depends_on "fftw" => :optional
 
-  opoo "--with-ghostscript is not recommended" if build.with? "ghostscript"
-
-  def pour_bottle?
-    # If libtool is keg-only it currently breaks the bottle.
-    # This is a temporary workaround until we have a better fix.
-    not Formula["libtool"].keg_only?
-  end
+  depends_on "xz"
 
   skip_clean :la
 
@@ -73,6 +58,7 @@ class ImagemagickQuartz < Formula
     args << "--with-gs-font-dir=#{HOMEBREW_PREFIX}/share/ghostscript/fonts" if build.without? "ghostscript"
     args << "--without-magick-plus-plus" if build.without? "magick-plus-plus"
     args << "--enable-hdri=yes" if build.include? "enable-hdri"
+    args << "--enable-fftw=yes" if build.with? "fftw"
 
     if build.with? "quantum-depth-32"
       quantum_depth = 32
@@ -89,7 +75,7 @@ class ImagemagickQuartz < Formula
     end
 
     args << "--with-quantum-depth=#{quantum_depth}" if quantum_depth
-    args << "--with-rsvg" if build.with? "librsvg"
+    args << "--with-rsvg" if build.with? "librsvg-quartz"
     args << "--without-x" if build.without? "x11"
     args << "--with-fontconfig=yes" if build.with? "fontconfig"
     args << "--with-freetype=yes" if build.with? "freetype"
@@ -116,7 +102,6 @@ class ImagemagickQuartz < Formula
   end
 
   test do
-    test_png = HOMEBREW_LIBRARY/"Homebrew/test/fixtures/test.png"
-    system "#{bin}/identify", test_png
+    system "#{bin}/identify", test_fixtures("test.png")
   end
 end

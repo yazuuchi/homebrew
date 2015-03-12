@@ -2,15 +2,15 @@ require "formula"
 
 class EasyTagQuartz < Formula
   homepage "http://projects.gnome.org/easytag"
-  url "http://ftp.gnome.org/pub/GNOME/sources/easytag/2.2/easytag-2.2.3.tar.xz"
-  sha1 "dfe4170f01b0d1e571329999995b5859fb2a2ce3"
+  url "http://ftp.gnome.org/pub/GNOME/sources/easytag/2.2/easytag-2.2.5.tar.xz"
+  sha256 "a6da3a094997fa225d1c01211b282f2d3c2dfd93a74f3bec24017bd5a13f3855"
 
   depends_on "pkg-config" => :build
   depends_on "intltool" => :build
   depends_on "itstool" => :build
   depends_on "gtk+-quartz"
-  depends_on "pango-quartz"
-  depends_on "cairo-quartz"
+#  depends_on "pango-quartz"
+#  depends_on "cairo-quartz"
   depends_on "hicolor-icon-theme"
   depends_on "id3lib"
   depends_on "libid3tag"
@@ -24,7 +24,7 @@ class EasyTagQuartz < Formula
   depends_on "wavpack" => :optional
 
   def install
-    ENV.append_path "PYTHONPATH", "#{Formula["libxml2"].lib}/python2.7/site-packages"
+    ENV.append_path "PYTHONPATH", "#{Formula["libxml2"].opt_lib}/python2.7/site-packages"
     system "./configure", "--disable-dependency-tracking",
                           "--prefix=#{prefix}"
     system "make"

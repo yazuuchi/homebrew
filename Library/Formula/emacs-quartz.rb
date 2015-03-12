@@ -2,28 +2,31 @@ require "formula"
 
 class EmacsQuartz < Formula
   homepage "https://www.gnu.org/software/emacs/"
-  url "http://ftpmirror.gnu.org/emacs/emacs-24.4.tar.xz"
-  mirror "https://ftp.gnu.org/pub/gnu/emacs/emacs-24.4.tar.xz"
-  sha256 "47e391170db4ca0a3c724530c7050655f6d573a711956b4cd84693c194a9d4fd"
+
+  stable do
+    url "http://ftpmirror.gnu.org/emacs/emacs-24.4.tar.xz"
+    mirror "https://ftp.gnu.org/pub/gnu/emacs/emacs-24.4.tar.xz"
+    sha256 "47e391170db4ca0a3c724530c7050655f6d573a711956b4cd84693c194a9d4fd"
+    # Fix ns-antialias-text, broken in 24.4, from upstream:
+    # https://github.com/emacs-mirror/emacs/commit/604a4d21ead40691afe3efe13f0ba1000b2cd61a
+    # http://debbugs.gnu.org/cgi/bugreport.cgi?bug=18876
+
+    patch do
+      url 'https://gist.githubusercontent.com/scotchi/66edaf426d7375c0f061/raw/4c5229a8a719f81fa6bd2e1e0c85d10b6f635765/emacs-fix-ns-antialias-text-mac-os.patch'
+      sha1 'b63eab599a7ce69de03629494a727f45b310c166'
+    end
+  end
 
   option "cocoa", "Build a Cocoa version of emacs"
-  option "with-x", "Include X11 support"
-  option "use-git-head", "Use Savannah (faster) git mirror for HEAD builds"
   option "keep-ctags", "Don't remove the ctags executable that emacs provides"
 
   head do
-    if build.include? "use-git-head"
-      url "http://git.sv.gnu.org/r/emacs.git"
-    else
-      url "bzr://http://bzr.savannah.gnu.org/r/emacs/trunk"
-    end
-
+    url "http://git.sv.gnu.org/r/emacs.git"
     depends_on "autoconf" => :build
     depends_on "automake" => :build
   end
 
   depends_on "pkg-config" => :build
-  depends_on :x11 if build.with? "x"
   depends_on "d-bus" => :optional
   depends_on "gnutls" => :optional
   depends_on "librsvg-quartz" => :optional
@@ -76,16 +79,7 @@ class EmacsQuartz < Formula
         exec #{prefix}/Emacs.app/Contents/MacOS/Emacs -nw  "$@"
       EOS
     else
-      if build.with? "x"
-        # These libs are not specified in xft's .pc. See:
-        # https://trac.macports.org/browser/trunk/dports/editors/emacs/Portfile#L74
-        # https://github.com/Homebrew/homebrew/issues/8156
-        ENV.append "LDFLAGS", "-lfreetype -lfontconfig"
-        args << "--with-x"
-        args << "--with-gif=no" << "--with-tiff=no" << "--with-jpeg=no"
-      else
-        args << "--without-x"
-      end
+      args << "--without-x"
 
       system "./configure", *args
       system "make"

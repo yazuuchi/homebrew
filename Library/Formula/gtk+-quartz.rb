@@ -2,8 +2,8 @@ require 'formula'
 
 class GtkxQuartz < Formula
   homepage 'http://gtk.org/'
-  url 'http://ftp.gnome.org/pub/gnome/sources/gtk+/2.24/gtk+-2.24.24.tar.xz'
-  sha256 '12ceb2e198c82bfb93eb36348b6e9293c8fdcd60786763d04cfec7ebe7ed3d6d'
+  url 'http://ftp.gnome.org/pub/gnome/sources/gtk+/2.24/gtk+-2.24.25.tar.xz'
+  sha256 '38af1020cb8ff3d10dda2c8807f11e92af9d2fa4045de61c62eedb7fbc7ea5b3'
 
   depends_on 'pkg-config' => :build
   depends_on 'glib'
@@ -22,16 +22,14 @@ class GtkxQuartz < Formula
   end
 
   def install
-    args = %W[
-      --disable-dependency-tracking
-      --disable-silent-rules
-      --prefix=#{prefix}
-      --disable-glibtest
-      --enable-introspection=yes
-      --disable-visibility
-      --with-gdktarget=quartz
-      --enable-quartz-relocation
-    ]
+    args = ["--disable-dependency-tracking",
+            "--disable-silent-rules",
+            "--prefix=#{prefix}",
+            "--disable-glibtest",
+            "--enable-introspection=yes",
+            "--disable-visibility",
+            "--with-gdktarget=quartz",
+            "--enable-quartz-relocation" ]
 
     system "./configure", *args
     system "make install"
