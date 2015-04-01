@@ -569,6 +569,8 @@ class Formula
   # Returns a list of Dependency objects in an installable order, which
   # means if a depends on b then b will be ordered before a in this list
   def recursive_dependencies(&block)
+    #yaz: for dependency debug
+    #print Dependency.expand(self, &block)
     Dependency.expand(self, &block)
   end
 
