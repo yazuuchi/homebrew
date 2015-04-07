@@ -916,7 +916,7 @@ class Formula
     end
 
     def go_resource name, &block
-      resource name, Resource::Go, &block
+      specs.each { |spec| spec.go_resource(name, &block) }
     end
 
     def depends_on dep
