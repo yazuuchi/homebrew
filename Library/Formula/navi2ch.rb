@@ -4,7 +4,7 @@ class Navi2ch <Formula
   url 'http://downloads.sourceforge.net/project/navi2ch/navi2ch/navi2ch-1.8.4/navi2ch-1.8.4.tar.gz'
   head 'git://navi2ch.git.sourceforge.net/gitroot/navi2ch/navi2ch'
   homepage 'http://navi2ch.sourceforge.net/'
-  md5 'af72b1c72ea9e10aafb0744b17ffe79a'
+  sha256 'a2647881d1c20539148f8a01fcfa6f230d59582331ffd2d930effcbba307c603'
 
   def install
     system "./configure",
