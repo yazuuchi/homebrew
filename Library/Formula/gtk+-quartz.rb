@@ -1,19 +1,15 @@
 require 'formula'
 
 class GtkxQuartz < Formula
-  homepage 'http://gtk.org/'
-  url 'http://ftp.gnome.org/pub/gnome/sources/gtk+/2.24/gtk+-2.24.25.tar.xz'
-  sha256 '38af1020cb8ff3d10dda2c8807f11e92af9d2fa4045de61c62eedb7fbc7ea5b3'
+  homepage "http://gtk.org/"
+  url "https://download.gnome.org/sources/gtk+/2.24/gtk+-2.24.27.tar.xz"
+  sha256 "20cb10cae43999732a9af2e9aac4d1adebf2a9c2e1ba147050976abca5cd24f4"
 
   depends_on 'pkg-config' => :build
-  depends_on 'glib'
-  depends_on 'jpeg'
-  depends_on 'libtiff'
   depends_on 'gdk-pixbuf'
-  depends_on 'pango-quartz'
   depends_on 'jasper' => :optional
   depends_on 'atk'
-  depends_on 'cairo-quartz'
+  depends_on 'pango-quartz'
   depends_on 'gobject-introspection'
 
   fails_with :llvm do
