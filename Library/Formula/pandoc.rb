@@ -4,25 +4,22 @@ class Pandoc < Formula
   include Language::Haskell::Cabal
 
   homepage "http://pandoc.org"
-  url "https://hackage.haskell.org/package/pandoc-1.13.2.1/pandoc-1.13.2.1.tar.gz"
-  sha256 "66da6eb690b8de41eccf05620e165630854d74c08cf69dbfb68d0ea84589785f"
+  url "https://hackage.haskell.org/package/pandoc-1.14.0.2/pandoc-1.14.0.2.tar.gz"
+  sha256 "5d60bddc474499a2aa553e200da2860fed9e48a3db77072355f5f7c666a56bd0"
 
   head "https://github.com/jgm/pandoc.git"
 
   bottle do
-    sha256 "e9df02321a7129c78dec25d350730cd6e9197d31ef96c800f6462535c9411749" => :yosemite
-    sha256 "471cbe82c36664f90d43736c2169048cf2735b21895a6da936cf46620b963444" => :mavericks
-    sha256 "0fa5678764cea7319f9f09bca10e2413157f0310ac2067efc9d3d7cd6c02195a" => :mountain_lion
+    sha256 "dda5a71f09d869a7c46bf6b2af39a05e79633f125b564fa431109c198832eab2" => :yosemite
+    sha256 "f99e53a35876f07687bcf81e10894a482510f735aa54d2b303edce2c8f170aea" => :mavericks
+    sha256 "d4edcf75c228b95e96117731bee0a75158f143ea7f604aeb2d38ff5fbd218297" => :mountain_lion
   end
 
   depends_on "ghc" => :build
   depends_on "cabal-install" => :build
   depends_on "gmp"
 
-  fails_with :clang do
-    build 425
-    cause "clang segfaults on Lion"
-  end
+  setup_ghc_compilers
 
   def install
     cabal_sandbox do
