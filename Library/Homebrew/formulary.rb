@@ -1,3 +1,5 @@
+require "digest/md5"
+
 # The Formulary is responsible for creating instances of Formula.
 # It is not meant to be used directy from formulae.
 
@@ -14,6 +16,7 @@ class Formulary
 
   def self.load_formula(name, path)
     mod = Module.new
+    const_set("FormulaNamespace#{Digest::MD5.hexdigest(path.to_s)}", mod)
     mod.module_eval(path.read, path)
     class_name = class_s(name)
 
@@ -69,17 +72,8 @@ class Formulary
   class BottleLoader < FormulaLoader
     def initialize bottle_name
       @bottle_filename = Pathname(bottle_name).realpath
-      name_without_version = bottle_filename_formula_name @bottle_filename
-      if name_without_version.empty?
-        if ARGV.homebrew_developer?
-          opoo "Add a new regex to bottle_version.rb to parse this filename."
-        end
-        name = bottle_name
-      else
-        name = name_without_version
-      end
-
-      super name, Formulary.path(name)
+      name, full_name = bottle_resolve_formula_names @bottle_filename
+      super name, Formulary.path(full_name)
     end
 
     def get_formula(spec)
