@@ -1,6 +1,7 @@
 require "formula"
 
 class Neo4j < Formula
+  desc "Robust (fully ACID) transactional property graph database"
   homepage "http://neo4j.org"
   url "http://dist.neo4j.org/neo4j-community-2.2.2-unix.tar.gz"
   sha1 "b5b12d7815ffa7d232c29d0021b5d8629c243073"
@@ -14,9 +15,9 @@ class Neo4j < Formula
   end
 
   devel do
-    url "http://dist.neo4j.org/neo4j-community-2.3.0-M01-unix.tar.gz"
-    sha1 "288f917f5f3822ca70c8eef5bcf1639392a41036"
-    version "2.3.0-M01"
+    url "http://dist.neo4j.org/neo4j-community-2.3.0-M02-unix.tar.gz"
+    sha1 "1bcdc0272bad230314d827cea7c8279b5f7ab4b0"
+    version "2.3.0-M02"
   end
 
   def install
