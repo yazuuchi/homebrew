@@ -9,6 +9,7 @@ require 'formulary'
 require 'software_spec'
 require 'install_renamed'
 require 'pkg_version'
+require 'tap'
 
 # A formula provides instructions and metadata for Homebrew to install a piece
 # of software. Every Homebrew formula is a {Formula}.
@@ -615,7 +616,7 @@ class Formula
   def python(options={}, &block)
     opoo 'Formula#python is deprecated and will go away shortly.'
     block.call if block_given?
-    PythonDependency.new
+    PythonRequirement.new
   end
   alias_method :python2, :python
   alias_method :python3, :python
@@ -627,14 +628,7 @@ class Formula
 
   # an array of all tap {Formula} names
   def self.tap_names
-    names = []
-    Pathname.glob("#{HOMEBREW_LIBRARY}/Taps/*/*/") do |tap|
-      tap.find_formula do |formula|
-        formula.to_s =~ HOMEBREW_TAP_PATH_REGEX
-        names << "#{$1}/#{$2.gsub(/^homebrew-/, "")}/#{formula.basename(".rb")}"
-      end
-    end
-    names.sort
+    Tap.map(&:formula_names).flatten.sort
   end
 
   # an array of all {Formula} names
