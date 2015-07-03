@@ -1,9 +1,9 @@
-require "formula"
-
 class ImagemagickQuartz < Formula
+  desc "Tools and libraries to manipulate images in many formats"
   homepage "http://www.imagemagick.org"
-  url "http://www.imagemagick.org/download/releases/ImageMagick-6.9.0-10.tar.xz"
-  sha256 "d1f5dcd32a93130feb9e980a8a97517d3a2c814a8b608d139d4756516548748c"
+  url "http://www.imagemagick.org/download/releases/ImageMagick-6.9.1-6.tar.xz"
+  mirror "http://ftp.nluug.nl/ImageMagick/ImageMagick-6.9.1-6.tar.xz"
+  sha256 "8d83934df129833f9e8696017182d8bbca8189842bbd2705c24729fed8db3358"
 
   head "https://www.imagemagick.org/subversion/ImageMagick/trunk",
     :using => UnsafeSubversionDownloadStrategy

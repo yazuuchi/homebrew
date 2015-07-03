@@ -1,16 +1,8 @@
-require 'formula'
-
 class LibrsvgQuartz < Formula
-  homepage 'https://live.gnome.org/LibRsvg'
-  url 'http://ftp.gnome.org/pub/GNOME/sources/librsvg/2.36/librsvg-2.36.3.tar.xz'
-  sha256 '3d7d583271030e21acacc60cb6b81ee305713c9da5e98429cbd609312aea3632'
-
-  bottle do
-    cellar :any
-    sha1 "d01815e453ec00c29de8d5a57652e38df1ae81aa" => :mavericks
-    sha1 "5415045a2de814249515a5ec96cb773b6885d939" => :mountain_lion
-    sha1 "276af00164ceb754199b2aed99079378b581579e" => :lion
-  end
+  desc "Library to render SVG files using Cairo"
+  url "https://download.gnome.org/sources/librsvg/2.40/librsvg-2.40.9.tar.xz"
+  sha256 "13964c5d35357552b47d365c34215eee0a63bf0e6059b689f048648c6bf5f43a"
+  revision 1
 
   depends_on 'pkg-config' => :build
   depends_on 'gtk+-quartz'

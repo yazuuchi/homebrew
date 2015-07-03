@@ -1,16 +1,9 @@
-require 'formula'
-
 class CairommQuartz < Formula
-  homepage 'http://cairographics.org/cairomm/'
-  url 'http://cairographics.org/releases/cairomm-1.10.0.tar.gz'
-  sha256 '068d96c43eae7b0a3d98648cbfc6fbd16acc385858e9ba6d37b5a47e4dba398f'
+  desc "Vector graphics library with cross-device output support"
+  homepage "http://cairographics.org/cairomm/"
+  url "http://cairographics.org/releases/cairomm-1.11.2.tar.gz"
+  sha256 "ccf677098c1e08e189add0bd146f78498109f202575491a82f1815b6bc28008d"
   revision 1
-
-  bottle do
-    sha1 "cd8a555f260bb8b8fe8f82e79b19413255df4e04" => :mavericks
-    sha1 "76bd3aa998281c12a7b5e936bc3c03462a07e4e6" => :mountain_lion
-    sha1 "8640ddb943e78dc271c870d259c079bbbfcba668" => :lion
-  end
 
   option :cxx11
 
@@ -28,6 +21,6 @@ class CairommQuartz < Formula
     ENV.cxx11 if build.cxx11?
     system "./configure", "--disable-dependency-tracking",
                           "--prefix=#{prefix}"
-    system "make install"
+    system "make", "install"
   end
 end

@@ -1,9 +1,8 @@
-require "formula"
-
 class HarfbuzzQuartz < Formula
-  homepage "http://www.freedesktop.org/wiki/Software/HarfBuzz"
-  url "http://www.freedesktop.org/software/harfbuzz/release/harfbuzz-0.9.38.tar.bz2"
-  sha256 "6736f383b4edfcaaeb6f3292302ca382d617d8c79948bb2dd2e8f86cdccfd514"
+  desc "OpenType text shaping engine"
+  homepage "https://wiki.freedesktop.org/www/Software/HarfBuzz/"
+  url "http://www.freedesktop.org/software/harfbuzz/release/harfbuzz-0.9.41.tar.bz2"
+  sha256 "d81aa53d0c02b437beeaac159d7fc16394d676bbce0860fb6f6a10b587dc057c"
 
   depends_on "pkg-config" => :build
   depends_on "glib"
