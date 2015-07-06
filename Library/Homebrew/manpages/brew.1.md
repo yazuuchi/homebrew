@@ -69,6 +69,9 @@ Note that these flags should only appear after a command.
     versions of formula. Note downloads for any installed formula will still not be
     deleted. If you want to delete those too: `rm -rf $(brew --cache)`
 
+  * `command` <cmd>:
+    Display the path to the file which is used when invoking `brew <cmd>`.
+
   * `commands`:
     Show a list of built-in and external commands.
 
@@ -664,7 +667,7 @@ Homebrew Documentation: <https://github.com/Homebrew/homebrew/blob/master/share/
 
 ## AUTHORS
 
-Homebrew's current maintainers are Misty De Meo, Adam Vandenberg, Jack Nagel, Mike McQuaid, Brett Koonce and Tim Smith.
+Homebrew's current maintainers are Misty De Meo, Adam Vandenberg, Mike McQuaid, Brett Koonce and Tim Smith.
 
 Homebrew was originally created by Max Howell.
 
