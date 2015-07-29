@@ -930,6 +930,7 @@ class Formula
       @buildpath = Pathname.pwd
       env_home = buildpath/".brew_home"
       mkdir_p env_home
+      touch env_home/".zshrc" if ENV["SHELL"].include? "zsh"
 
       old_home, ENV["HOME"] = ENV["HOME"], env_home
 
@@ -943,7 +944,7 @@ class Formula
   end
 
   def prepare_patches
-    active_spec.add_legacy_patches(patches)
+    active_spec.add_legacy_patches(patches) if respond_to?(:patches)
 
     patchlist.grep(DATAPatch) { |p| p.path = path }
 
