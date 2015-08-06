@@ -1,5 +1,3 @@
-require 'formula'
-
 class Libmowgli < Formula
   homepage 'http://atheme.org/Project/mowgli'
   url 'https://github.com/yazuuchi/libmowgli/archive/libmowgli-1.0.0.tar.gz'
