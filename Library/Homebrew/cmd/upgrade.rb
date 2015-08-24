@@ -3,6 +3,8 @@ require "cmd/outdated"
 
 module Homebrew
   def upgrade
+    FormulaInstaller.prevent_build_flags unless MacOS.has_apple_developer_tools?
+
     Homebrew.perform_preinstall_checks
 
     if ARGV.named.empty?
@@ -67,7 +69,6 @@ module Homebrew
     outdated_keg.unlink if outdated_keg
 
     fi.install
-    fi.caveats
     fi.finish
 
     # If the formula was pinned, and we were force-upgrading it, unpin and

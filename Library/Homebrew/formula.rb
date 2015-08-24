@@ -10,6 +10,8 @@ require "software_spec"
 require "install_renamed"
 require "pkg_version"
 require "tap"
+require "formula_renames"
+require "keg"
 
 # A formula provides instructions and metadata for Homebrew to install a piece
 # of software. Every Homebrew formula is a {Formula}.
@@ -223,6 +225,21 @@ class Formula
     active_spec.resource(name)
   end
 
+  # An old name for the formula
+  def oldname
+    @oldname ||= if core_formula?
+      if FORMULA_RENAMES && FORMULA_RENAMES.value?(name)
+        FORMULA_RENAMES.to_a.rassoc(name).first
+      end
+    elsif tap?
+      user, repo = tap.split("/")
+      formula_renames = Tap.new(user, repo.sub("homebrew-", "")).formula_renames
+      if formula_renames.value?(name)
+        formula_renames.to_a.rassoc(name).first
+      end
+    end
+  end
+
   # The {Resource}s for the currently active {SoftwareSpec}.
   def resources
     active_spec.resources.values
@@ -314,7 +331,6 @@ class Formula
   # The currently installed version for this formula. Will raise an exception
   # if the formula is not installed.
   def installed_version
-    require "keg"
     Keg.new(installed_prefix).version
   end
 
@@ -641,6 +657,30 @@ class Formula
     self.class.skip_clean_paths.include? to_check
   end
 
+  # Sometimes we accidentally install files outside prefix. After we fix that,
+  # users will get nasty link conflict error. So we create a whitelist here to
+  # allow overwriting certain files. e.g.
+  #   link_overwrite "bin/foo", "lib/bar"
+  #   link_overwrite "share/man/man1/baz-*"
+  def link_overwrite?(path)
+    # Don't overwrite files not created by Homebrew.
+    return false unless path.stat.uid == File.stat(HOMEBREW_BREW_FILE).uid
+    # Don't overwrite files belong to other keg.
+    begin
+      Keg.for(path)
+    rescue NotAKegError, Errno::ENOENT
+      # file doesn't belong to any keg.
+    else
+      return false
+    end
+    to_check = path.relative_path_from(HOMEBREW_PREFIX).to_s
+    self.class.link_overwrite_paths.any? do |p|
+      p == to_check ||
+        to_check.start_with?(p.chomp("/") + "/") ||
+        /^#{Regexp.escape(p).gsub('\*', ".*?")}$/ === to_check
+    end
+  end
+
   def skip_cxxstdlib_check?
     false
   end
@@ -673,10 +713,15 @@ class Formula
   def lock
     @lock = FormulaLock.new(name)
     @lock.lock
+    if oldname && (oldname_rack = HOMEBREW_CELLAR/oldname).exist? && oldname_rack.resolved_path == rack
+      @oldname_lock = FormulaLock.new(oldname)
+      @oldname_lock.lock
+    end
   end
 
   def unlock
     @lock.unlock unless @lock.nil?
+    @oldname_lock.unlock unless @oldname_lock.nil?
   end
 
   def pinnable?
@@ -720,7 +765,11 @@ class Formula
   end
 
   def file_modified?
-    return false unless which("git")
+    git_dir = MacOS.locate("git").dirname.to_s
+
+    # /usr/bin/git is a popup stub when Xcode/CLT aren't installed, so bail out
+    return false if git_dir == "/usr/bin" && !MacOS.has_apple_developer_tools?
+
     path.parent.cd do
       diff = Utils.popen_read("git", "diff", "origin/master", "--", "#{path}")
       !diff.empty? && $?.exitstatus == 0
@@ -757,12 +806,12 @@ class Formula
 
   # an array of all tap {Formula} names
   def self.tap_names
-    @tap_names ||= Tap.map(&:formula_names).flatten.sort
+    @tap_names ||= Tap.flat_map(&:formula_names).sort
   end
 
   # an array of all tap {Formula} files
   def self.tap_files
-    @tap_files ||= Tap.map(&:formula_files).flatten
+    @tap_files ||= Tap.flat_map(&:formula_files)
   end
 
   # an array of all {Formula} names
@@ -793,18 +842,23 @@ class Formula
     end
   end
 
-  # An array of all installed {Formula}
-  def self.installed
-    @installed ||= if HOMEBREW_CELLAR.directory?
-      HOMEBREW_CELLAR.subdirs.map do |rack|
-        begin
-          Formulary.from_rack(rack)
-        rescue FormulaUnavailableError, TapFormulaAmbiguityError
-        end
-      end.compact
+  # An array of all racks currently installed.
+  def self.racks
+    @racks ||= if HOMEBREW_CELLAR.directory?
+      HOMEBREW_CELLAR.subdirs.reject(&:symlink?)
     else
       []
     end
+  end
+
+  # An array of all installed {Formula}
+  def self.installed
+    @installed ||= racks.map do |rack|
+      begin
+        Formulary.from_rack(rack)
+      rescue FormulaUnavailableError, TapFormulaAmbiguityError
+      end
+    end.compact
   end
 
   def self.aliases
@@ -866,6 +920,7 @@ class Formula
       "full_name" => full_name,
       "desc" => desc,
       "homepage" => homepage,
+      "oldname" => oldname,
       "versions" => {
         "stable" => (stable.version.to_s if stable),
         "bottle" => bottle ? true : false,
@@ -1085,8 +1140,8 @@ class Formula
 
     patchlist.grep(DATAPatch) { |p| p.path = path }
 
-    patchlist.select(&:external?).each do |patch|
-      patch.verify_download_integrity(patch.fetch)
+    patchlist.each do |patch|
+      patch.verify_download_integrity(patch.fetch) if patch.external?
     end
   end
 
@@ -1321,6 +1376,15 @@ class Formula
 
     def test(&block)
       define_method(:test, &block)
+    end
+
+    def link_overwrite(*paths)
+      paths.flatten!
+      link_overwrite_paths.merge(paths)
+    end
+
+    def link_overwrite_paths
+      @link_overwrite_paths ||= Set.new
     end
   end
 end

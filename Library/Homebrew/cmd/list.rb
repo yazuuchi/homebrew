@@ -68,8 +68,8 @@ module Homebrew
     dirs.delete "var"
 
     args = dirs + %w[-type f (]
-    args.concat UNBREWED_EXCLUDE_FILES.map { |f| %W[! -name #{f}] }.flatten
-    args.concat UNBREWED_EXCLUDE_PATHS.map { |d| %W[! -path #{d}] }.flatten
+    args.concat UNBREWED_EXCLUDE_FILES.flat_map { |f| %W[! -name #{f}] }
+    args.concat UNBREWED_EXCLUDE_PATHS.flat_map { |d| %W[! -path #{d}] }
     args.concat %w[)]
 
     cd HOMEBREW_PREFIX
@@ -78,7 +78,7 @@ module Homebrew
 
   def filtered_list
     names = if ARGV.named.empty?
-      HOMEBREW_CELLAR.subdirs
+      Formula.racks
     else
       ARGV.named.map { |n| HOMEBREW_CELLAR+n }.select(&:exist?)
     end
@@ -136,7 +136,7 @@ class PrettyListing
     root.children.sort.each do |pn|
       if pn.directory?
         dirs << pn
-      elsif block_given? and yield pn
+      elsif block_given? && yield(pn)
         puts pn
         other = "other "
       else

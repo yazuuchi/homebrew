@@ -28,9 +28,9 @@ class Wine < Formula
   end
 
   devel do
-    url "https://downloads.sourceforge.net/project/wine/Source/wine-1.7.48.tar.bz2"
-    mirror "http://mirrors.ibiblio.org/wine/source/1.7/wine-1.7.48.tar.bz2"
-    sha256 "e3f55ce56e2092d49b317fea8802e314be2b2170fd434f5e45f7141773946c8e"
+    url "https://downloads.sourceforge.net/project/wine/Source/wine-1.7.50.tar.bz2"
+    mirror "http://mirrors.ibiblio.org/wine/source/1.7/wine-1.7.50.tar.bz2"
+    sha256 "7c5410fab820281f337d478c18305027363c9012f30f742339ef1eb0f9dd711e"
 
     depends_on "samba" => :optional
     depends_on "gnutls"
@@ -70,8 +70,8 @@ class Wine < Formula
   depends_on "libgsm" => :optional
 
   resource "gecko" do
-    url "https://downloads.sourceforge.net/wine/wine_gecko-2.36-x86.msi", :using => :nounzip
-    sha256 "afa457ce8f9885225b6e549dd6f154713ce15bf063c23e38c1327d2f869e128a"
+    url "https://downloads.sourceforge.net/wine/wine_gecko-2.40-x86.msi", :using => :nounzip
+    sha256 "1a29d17435a52b7663cea6f30a0771f74097962b07031947719bb7b46057d302"
   end
 
   resource "mono" do
@@ -140,7 +140,7 @@ class Wine < Formula
 
         # Emulate some things that superenv would normally handle for us
         # We're configured to use GNU GCC, so remote an unsupported flag
-        s.gsub! "-gstabs+", ""
+        s.gsub! "-gstabs+", "" if build.stable?
         # Pass the sysroot to support Xcode-only systems
         cflags  = s.get_make_var("CFLAGS")
         cflags += " --sysroot=#{MacOS.sdk_path}"
