@@ -765,10 +765,13 @@ class Formula
   end
 
   def file_modified?
-    git_dir = MacOS.locate("git").dirname.to_s
+    git = which("git")
+
+    # git isn't installed by older Xcodes
+    return false if git.nil?
 
     # /usr/bin/git is a popup stub when Xcode/CLT aren't installed, so bail out
-    return false if git_dir == "/usr/bin" && !MacOS.has_apple_developer_tools?
+    return false if git == "/usr/bin/git" && !MacOS.has_apple_developer_tools?
 
     path.parent.cd do
       diff = Utils.popen_read("git", "diff", "origin/master", "--", "#{path}")
