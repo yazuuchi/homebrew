@@ -5,6 +5,7 @@ require "utils/json"
 require "utils/inreplace"
 require "utils/popen"
 require "utils/fork"
+require "utils/git"
 require "open-uri"
 
 class Tty
@@ -80,6 +81,7 @@ def oh1(title)
   puts "#{Tty.green}==>#{Tty.white} #{title}#{Tty.reset}"
 end
 
+# Print a warning (do this rarely)
 def opoo(warning)
   $stderr.puts "#{Tty.yellow}Warning#{Tty.reset}: #{warning}"
 end
@@ -160,8 +162,7 @@ module Homebrew
   end
 
   def self.homebrew_version_string
-    pretty_revision = git_short_head
-    if pretty_revision
+    if Utils.git_available? && (pretty_revision = git_short_head)
       last_commit = git_last_commit_date
       "#{HOMEBREW_VERSION} (git revision #{pretty_revision}; last commit #{last_commit})"
     else
