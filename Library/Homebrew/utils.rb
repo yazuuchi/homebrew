@@ -1,6 +1,5 @@
 require "pathname"
 require "exceptions"
-require "os/mac"
 require "utils/json"
 require "utils/inreplace"
 require "utils/popen"
@@ -43,7 +42,7 @@ class Tty
     end
 
     def highlight
-      bold 43
+      bold 39
     end
 
     def width
