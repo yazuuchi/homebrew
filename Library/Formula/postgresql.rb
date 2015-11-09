@@ -1,6 +1,7 @@
 class Postgresql < Formula
   desc "Object-relational database system"
   homepage "https://www.postgresql.org/"
+  revision 1
 
   stable do
     url "https://ftp.postgresql.org/pub/source/v9.4.5/postgresql-9.4.5.tar.bz2"
@@ -14,16 +15,15 @@ class Postgresql < Formula
   end
 
   bottle do
-    sha256 "57294da21442db822bf719143880000c9a90656188dcf580fafcb6b4e4350f9e" => :el_capitan
-    sha256 "02a136458ee09cc7fdb731c023948359dafa5665b56179744985864492adacd4" => :yosemite
-    sha256 "13f6fec00aa8b4938a2858bdcda390460d21bb71d16fc0827bf8446071c60f47" => :mavericks
+    sha256 "4a843d7918d3f6a2526b93d1bf4222e64bfa127ac81648db9a0df21bacd36df8" => :el_capitan
+    sha256 "9a796f9f9d129af45ca1d2d8e54a17c7116164d226c0282a14005afa2b2a09be" => :yosemite
+    sha256 "0b764882f8dbb339b3023736091a94abbad797c2a95118953031ba08567c177b" => :mavericks
   end
 
   option "32-bit"
   option "without-perl", "Build without Perl support"
   option "without-tcl", "Build without Tcl support"
   option "with-dtrace", "Build with DTrace support"
-  option "with-pgroonga", "Build with the PGroonga postgresql extension"
 
   deprecated_option "no-perl" => "without-perl"
   deprecated_option "no-tcl" => "without-tcl"
@@ -33,16 +33,6 @@ class Postgresql < Formula
   depends_on "readline"
   depends_on "libxml2" if MacOS.version <= :leopard # Leopard libxml is too old
   depends_on :python => :optional
-
-  if build.with? "pgroonga"
-    depends_on "groonga" => :build
-    depends_on "pkg-config" => :build
-  end
-
-  resource "pgroonga" do
-    url "http://packages.groonga.org/source/pgroonga/pgroonga-0.9.0.tar.gz"
-    sha256 "846b89d20c847bf54103978e5234fab0fbf95eafdcfffb35eac5273a26357f51"
-  end
 
   conflicts_with "postgres-xc",
     :because => "postgresql and postgres-xc install the same binaries."
@@ -61,7 +51,9 @@ class Postgresql < Formula
     args = %W[
       --disable-debug
       --prefix=#{prefix}
-      --datadir=#{share}/#{name}
+      --datadir=#{HOMEBREW_PREFIX}/share/postgresql
+      --libdir=#{HOMEBREW_PREFIX}/lib
+      --sysconfdir=#{etc}
       --docdir=#{doc}
       --enable-thread-safety
       --with-bonjour
@@ -94,15 +86,10 @@ class Postgresql < Formula
     end
 
     system "./configure", *args
-    system "make", "install-world"
-
-    if build.with? "pgroonga"
-      resource("pgroonga").stage do
-        ENV.append_path "PATH", bin
-        system "make"
-        system "make", "install"
-      end
-    end
+    system "make"
+    system "make", "install-world", "datadir=#{pkgshare}",
+                                    "libdir=#{lib}",
+                                    "pkglibdir=#{lib}/postgresql"
   end
 
   def post_install
@@ -153,5 +140,8 @@ class Postgresql < Formula
 
   test do
     system "#{bin}/initdb", testpath/"test"
+    assert_equal "#{HOMEBREW_PREFIX}/share/postgresql", shell_output("#{bin}/pg_config --sharedir").chomp
+    assert_equal "#{HOMEBREW_PREFIX}/lib", shell_output("#{bin}/pg_config --libdir").chomp
+    assert_equal "#{HOMEBREW_PREFIX}/lib/postgresql", shell_output("#{bin}/pg_config --pkglibdir").chomp
   end
 end
