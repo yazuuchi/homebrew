@@ -6,6 +6,7 @@ class AndroidSdk < Formula
   url "https://dl.google.com/android/android-sdk_r24.4.1-macosx.zip"
   version "24.4.1"
   sha256 "ce1638cb48526a0e55857fc46b57eda4349e6512006244ad13dd6c1361c74104"
+  revision 1
 
   bottle :unneeded
 
@@ -90,6 +91,9 @@ class AndroidSdk < Formula
       decoded_file.write Base64.decode64(File.read("adb.bash"))
       bash_completion.install decoded_file
     end
+
+    # automatically install platform and build tools
+    system "echo y | bash #{bin}/android --verbose update sdk --no-ui --all --filter platform-tools,build-tools-#{build_tools_version}"
   end
 
   def caveats; <<-EOS.undent
@@ -97,19 +101,8 @@ class AndroidSdk < Formula
 
     The Android-SDK is available at #{opt_prefix}
 
-    You will have to install the platform-tools and docs EVERY time this formula
-    updates. If you want to try and fix this then see the comment in this formula.
-
     You may need to add the following to your .bashrc:
       export ANDROID_HOME=#{opt_prefix}
     EOS
   end
-
-  # The 'android' tool insists on deleting #{prefix}/platform-tools
-  # and then installing the new one. So it is impossible for us to redirect
-  # the SDK location to var so that the platform-tools don't have to be
-  # freshly installed EVERY DANG time the base SDK updates.
-
-  # Ideas: make android a script that calls the actual android tool, but after
-  # that tool exits it repairs the directory locations?
 end
