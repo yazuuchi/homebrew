@@ -138,9 +138,18 @@ def pretty_uninstalled(f)
 end
 
 def pretty_duration(s)
-  return "2 seconds" if s < 3 # avoids the plural problem ;)
-  return "#{s.to_i} seconds" if s < 120
-  "%.1f minutes" % (s/60.0)
+  s = s.to_i
+  res = ""
+
+  if s > 59
+    m = s / 60
+    s %= 60
+    res = "#{m} minute#{plural m}"
+    return res if s == 0
+    res << " "
+  end
+
+  res + "#{s} second#{plural s}"
 end
 
 def plural(n, s = "s")
@@ -352,6 +361,19 @@ def which(cmd, path = ENV["PATH"])
   nil
 end
 
+def which_all(cmd, path = ENV["PATH"])
+  path.split(File::PATH_SEPARATOR).map do |p|
+    begin
+      pcmd = File.expand_path(cmd, p)
+    rescue ArgumentError
+      # File.expand_path will raise an ArgumentError if the path is malformed.
+      # See https://github.com/Homebrew/homebrew/issues/32789
+      next
+    end
+    Pathname.new(pcmd) if File.file?(pcmd) && File.executable?(pcmd)
+  end.compact.uniq
+end
+
 def which_editor
   editor = ENV.values_at("HOMEBREW_EDITOR", "VISUAL", "EDITOR").compact.first
   return editor unless editor.nil?
@@ -465,11 +487,7 @@ module GitHub
     end
 
     def pretty_ratelimit_reset(reset)
-      if (seconds = Time.at(reset) - Time.now) > 180
-        "%d minutes %d seconds" % [seconds / 60, seconds % 60]
-      else
-        "#{seconds} seconds"
-      end
+      pretty_duration(Time.at(reset) - Time.now)
     end
   end
 
@@ -586,4 +604,33 @@ module GitHub
     uri = URI.parse("https://api.github.com/repos/#{user}/#{repo}")
     open(uri) { |json| json["private"] }
   end
+end
+
+def disk_usage_readable(size_in_bytes)
+  if size_in_bytes >= 1_073_741_824
+    size = size_in_bytes.to_f / 1_073_741_824
+    unit = "G"
+  elsif size_in_bytes >= 1_048_576
+    size = size_in_bytes.to_f / 1_048_576
+    unit = "M"
+  elsif size_in_bytes >= 1_024
+    size = size_in_bytes.to_f / 1_024
+    unit = "K"
+  else
+    size = size_in_bytes
+    unit = "B"
+  end
+
+  # avoid trailing zero after decimal point
+  if (size * 10).to_i % 10 == 0
+    "#{size.to_i}#{unit}"
+  else
+    "#{"%.1f" % size}#{unit}"
+  end
+end
+
+def number_readable(number)
+  numstr = number.to_i.to_s
+  (numstr.size - 3).step(1, -3) { |i| numstr.insert(i, ",") }
+  numstr
 end
