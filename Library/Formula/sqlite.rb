@@ -1,15 +1,15 @@
 class Sqlite < Formula
   desc "Command-line interface for SQLite"
   homepage "https://sqlite.org/"
-  url "https://sqlite.org/2015/sqlite-autoconf-3090200.tar.gz"
-  version "3.9.2"
-  sha256 "064c0abe9c9177534d4c770bca7a5902f9924b629ac886b4c08956be6dfbc36b"
+  url "https://sqlite.org/2016/sqlite-autoconf-3100100.tar.gz"
+  version "3.10.1"
+  sha256 "3cb4e17137f7422554c8e8906b5a7274c7a0d362872e8aa25233c3f1246bda98"
 
   bottle do
     cellar :any
-    sha256 "87728b4a68575b2b26b21b20f9e175342dd951e5c723e3730cdfe094219d7870" => :el_capitan
-    sha256 "5904d6943b66ae30f2d1c2add3c39c23eeeec802adfb52d589a0baede082349a" => :yosemite
-    sha256 "26ca0151df66630ad513d3280fc010eeba4a8587143c8b3840916ded8717d889" => :mavericks
+    sha256 "4076b6a94885493b02d52b9e122cc4b00d2fe064a6104d234c9eed4e31f730be" => :el_capitan
+    sha256 "7468e6f09180b4bfd716adfd278c8195c3ce1bc744fb942ba33356ea72e04fc0" => :yosemite
+    sha256 "6f69c3d772c0b13a9001cc75a12797ad88295a902fb50ae82a4d35236f641a67" => :mavericks
   end
 
   keg_only :provided_by_osx, "OS X provides an older sqlite3."
@@ -36,9 +36,9 @@ class Sqlite < Formula
   end
 
   resource "docs" do
-    url "https://sqlite.org/2015/sqlite-doc-3090200.zip"
-    version "3.9.2"
-    sha256 "4b9ecb9d2b0424ca2a288184ee36fa16a11033400638117dd7c669ad2d39177c"
+    url "https://sqlite.org/2016/sqlite-doc-3100100.zip"
+    version "3.10.1"
+    sha256 "a3bd7b5de156dac38cea07e3229bd4f03905ff84b591339925f26f5ea4b1830e"
   end
 
   def install
@@ -62,7 +62,9 @@ class Sqlite < Formula
 
     ENV.universal_binary if build.universal?
 
-    system "./configure", "--prefix=#{prefix}", "--disable-dependency-tracking", "--enable-dynamic-extensions"
+    system "./configure", "--prefix=#{prefix}",
+                          "--disable-dependency-tracking",
+                          "--enable-dynamic-extensions"
     system "make", "install"
 
     if build.with? "functions"
@@ -109,8 +111,7 @@ class Sqlite < Formula
       select name from students order by age asc;
     EOS
 
-    names = `#{bin}/sqlite3 < #{path}`.strip.split("\n")
+    names = shell_output("#{bin}/sqlite3 < #{path}").strip.split("\n")
     assert_equal %w[Sue Tim Bob], names
-    assert_equal 0, $?.exitstatus
   end
 end
